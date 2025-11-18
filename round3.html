@@ -2,813 +2,851 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Esports Team Management Simulator</title>
+<title>Esports Recruitment & Season Simulator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-/* ============================================================
-   GLOBAL VARIABLES — PER STEP THEMES
-============================================================ */
-:root {
+:root{
   --bg:#070b16;
-  --text:#e8eeff;
   --panel:#11172b;
   --line:#1f2a52;
+  --text:#e8eeff;
+  --muted:#b9c8ff;
   --accent:#6aa8ff;
-
-  /* Step Theme Colors */
-  --color-step1:#4da3ff;    /* Recruitment blue */
-  --color-step2:#4dff91;    /* Training green */
-  --color-step3:#b570ff;    /* Staff purple */
-  --color-step4:#ff9a4d;    /* Roster orange */
-  --color-step5:#ffe84d;    /* Simulation yellow */
-  --color-step6:#ffddff;    /* Reflection soft white/pink */
+  --good:#10b981;
+  --bad:#ef4444;
+  --warn:#f59e0b;
+  --step1:#4da3ff;
+  --step2:#4dff91;
+  --step3:#b570ff;
+  --step4:#ff9a4d;
+  --step5:#ffe84d;
+  --step6:#ffddff;
 }
 
-/* ============================================================
-   BASE STYLES
-============================================================ */
-body {
+*{box-sizing:border-box;}
+body{
   margin:0;
-  background:radial-gradient(circle at top,#182343,#070b16 70%);
-  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  background:radial-gradient(circle at top,#192247,#070b16 60%);
   color:var(--text);
-  overflow:hidden; /* Dashboard layout */
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
 }
 
-/* ============================================================
-   CINEMATIC BACKGROUND (ALL STEPS)
-============================================================ */
-.cine-bg {
+/* ---------- CINEMATIC INTRO OVERLAY ---------- */
+.intro-overlay{
   position:fixed;
   inset:0;
+  background:#000;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   overflow:hidden;
-  z-index:-1;
-  background:radial-gradient(circle at 30% 30%, #1c284f, #070b16 80%);
+  animation:fadeIn .5s ease-out;
+}
+.intro-bg{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 30% 30%,#202f69,#070b16 70%);
+  filter:blur(4px);
   animation:bgPulse 12s infinite alternate ease-in-out;
 }
-
-@keyframes bgPulse {
-  from{transform:scale(1);}
-  to{transform:scale(1.04);}
-}
-
-.cine-glow {
+.glow{
   position:absolute;
   border-radius:50%;
-  filter:blur(80px);
-  opacity:.45;
-  animation:glowDrift 14s infinite alternate ease-in-out;
+  opacity:.4;
+  filter:blur(70px);
+  animation:glowDrift 13s infinite alternate ease-in-out;
 }
-.cine-glow.one { width:450px;height:450px; background:#6aa8ff; top:10%; left:10%; }
-.cine-glow.two { width:350px;height:350px; background:#ba8dff; bottom:15%; right:12%; animation-delay:3s; }
-.cine-glow.three { width:300px;height:300px; background:#6dffa0; top:60%; left:50%; animation-delay:6s; }
+.glow1{width:420px;height:420px;background:#6aa8ff;top:10%;left:15%;}
+.glow2{width:340px;height:340px;background:#a78bfa;bottom:12%;right:15%;animation-delay:3s;}
+.glow3{width:300px;height:300px;background:#4ade80;top:60%;left:55%;animation-delay:6s;}
 
-@keyframes glowDrift {
-  from{ transform:translate(-20px,-20px); }
-  to{ transform:translate(20px,20px); }
+@keyframes glowDrift{
+  from{transform:translate(-18px,-18px);}
+  to{transform:translate(18px,18px);}
 }
-
-/* ============================================================
-   LEFT TERMINAL NAVIGATION (AAA GAME CLIENT NAV)
-============================================================ */
-
-.nav-container {
-  position:fixed;
-  top:0;
-  bottom:0;
-  left:0;
-  width:240px;
-  backdrop-filter:blur(16px);
-  background:rgba(10,14,25,0.75);
-  border-right:1px solid var(--line);
-  padding-top:20px;
-  z-index:50;
+@keyframes bgPulse{
+  from{transform:scale(1);}
+  to{transform:scale(1.05);}
 }
-
-.nav-title {
-  text-align:center;
-  font-weight:700;
-  margin-bottom:24px;
-  font-size:1.2rem;
-  color:var(--accent);
-  letter-spacing:1px;
-}
-
-.nav-list {
-  display:flex;
-  flex-direction:column;
-  gap:10px;
-  padding:0 12px;
-}
-
-.nav-item {
-  padding:12px 16px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.08);
-  font-family:Consolas, monospace;
-  font-size:0.9rem;
-  cursor:pointer;
-  color:#9bb4ff;
-  transition:all .25s ease;
-}
-
-.nav-item:hover {
-  background:rgba(255,255,255,0.05);
-  border-color:var(--accent);
-  color:var(--accent);
-  transform:translateX(3px);
-}
-
-.nav-item.active {
-  background:rgba(255,255,255,0.12);
-  border-color:var(--accent);
-  color:var(--accent);
-  transform:translateX(0);
-}
-
-/* Codes look sci-fi: [01] RECRUIT */
-.nav-code {
-  color:var(--accent);
-  margin-right:6px;
-}
-
-/* ============================================================
-   MAIN CONTENT AREA
-============================================================ */
-.main-area {
-  margin-left:240px;
-  height:100vh;
-  overflow-y:auto;
-  padding:20px 26px 80px;
-}
-
-/* PANELS with cinematic glass effect */
-.panel {
-  background:rgba(15,20,35,0.78);
-  border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;
-  padding:24px;
+.intro-panel{
+  position:relative;
+  z-index:10;
+  width:90%;
+  max-width:700px;
+  padding:40px;
+  background:rgba(17,23,43,.85);
+  border:1px solid var(--line);
+  border-radius:18px;
   backdrop-filter:blur(12px);
-  margin-bottom:26px;
-  box-shadow:0 0 18px rgba(0,0,0,0.25);
-  animation:fadeIn .45s ease, scaleIn .25s ease;
+  animation:panelPop .6s ease-out;
 }
-
-@keyframes fadeIn {
-  from{opacity:0;}
-  to{opacity:1;}
+@keyframes panelPop{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
 }
-@keyframes scaleIn {
-  from{transform:scale(.97);}
-  to{transform:scale(1);}
-}
-
-/* THEMED PANEL HEADERS */
-.panel h2 {
-  margin-top:0;
-  font-size:1.5rem;
-  font-family:Consolas, monospace;
-  letter-spacing:1px;
-}
-
-.step1 h2 { color:var(--color-step1); }
-.step2 h2 { color:var(--color-step2); }
-.step3 h2 { color:var(--color-step3); }
-.step4 h2 { color:var(--color-step4); }
-.step5 h2 { color:var(--color-step5); }
-.step6 h2 { color:var(--color-step6); }
-
-/* Inputs & buttons */
-input, textarea, select {
-  background:#0b1020;
-  border:1px solid #2b355c;
-  color:var(--text);
-  border-radius:8px;
-  padding:10px;
-  width:100%;
-}
-
-textarea {
-  min-height:80px;
-  resize:vertical;
-}
-
-button {
-  padding:12px 20px;
-  background:var(--accent);
-  color:#050815;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  font-weight:700;
-  margin-top:10px;
-  transition:all .2s ease;
-}
-button:hover {
-  transform:scale(1.05);
-  box-shadow:0 0 12px rgba(106,168,255,0.5);
-}
-
-.option-grid {
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-.option-btn {
-  flex:1 1 240px;
-  padding:10px 14px;
-  border:1px solid rgba(255,255,255,0.08);
-  background:#0b1020;
-  border-radius:10px;
-  cursor:pointer;
-  transition:all .25s ease;
+.init-seq{
+  font-family:Consolas,monospace;
   color:#9bb4ff;
   font-size:.9rem;
+  margin-bottom:28px;
+  line-height:1.45;
 }
-.option-btn:hover {
+.init-seq .seq-line{opacity:0;}
+.init-seq .final{color:#4ade80;font-weight:700;}
+.intro-main{
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .6s ease,transform .6s ease;
+}
+.intro-main h1{
+  color:var(--accent);
+  font-size:2rem;
+  margin:0 0 10px;
+}
+.intro-main p{
+  color:var(--text);
+  font-size:1rem;
+  line-height:1.6;
+}
+.intro-controls{
+  margin-top:30px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+#beginBtn{
+  padding:12px 26px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  color:#050815;
+  cursor:pointer;
+  font-size:1rem;
+  font-weight:700;
+  box-shadow:0 0 14px rgba(106,168,255,.4);
+  transition:transform .2s ease,box-shadow .2s ease;
+}
+#beginBtn:hover{
+  transform:scale(1.07);
+  box-shadow:0 0 20px rgba(106,168,255,.7);
+}
+.audio-btn{
+  padding:8px 18px;
+  font-size:.9rem;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#9bb4ff;
+  cursor:pointer;
+}
+.audio-btn:hover{background:rgba(255,255,255,.12);}
+.fade-out{animation:fadeOut .7s ease-out forwards;}
+@keyframes fadeOut{to{opacity:0;pointer-events:none;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ---------- TOP PROGRESS + BOTTOM NAV ---------- */
+.top-bar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(7,11,22,.95);
+  backdrop-filter:blur(10px);
+  padding:10px 0 12px;
+  border-bottom:1px solid var(--line);
+}
+.progress-track{
+  height:6px;
+  background:#1c2440;
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#6aa8ff,#b5c8ff);
+  transition:width .4s ease;
+}
+.step-labels{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size:.75rem;
+}
+.step-chip{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--muted);
+  opacity:.5;
+}
+.step-chip.active{
   border-color:var(--accent);
   color:var(--accent);
+  opacity:1;
 }
-.option-btn.selected {
-  background:rgba(106,168,255,0.15);
-  border-color:var(--accent);
-  color:var(--accent);
+.step-chip.completed{opacity:.9;}
+
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(7,11,22,.96);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  padding:8px 0;
+}
+.nav-inner{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+}
+.btn-secondary{
+  background:transparent;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:10px 18px;
+  cursor:pointer;
+}
+#nextBtn,#prevBtn{
+  padding:10px 18px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  color:#050815;
+  font-weight:700;
+  cursor:pointer;
+}
+#prevBtn:disabled,#nextBtn:disabled{
+  opacity:.4;
+  cursor:default;
 }
 
-/* Player grid */
-.player-grid {
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-  gap:12px;
+/* ---------- MAIN CONTENT ---------- */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:16px 16px 80px;
 }
-.player-card {
-  padding:14px;
-  background:#0b1020;
-  border:1px solid rgba(255,255,255,0.08);
+.panel{
+  background:rgba(17,23,43,.9);
+  border-radius:16px;
+  padding:20px;
+  border:1px solid var(--line);
+  margin-bottom:18px;
+  box-shadow:0 0 18px rgba(0,0,0,0.4);
+  animation:fadeIn .35s ease,scaleIn .25s ease;
+}
+@keyframes scaleIn{from{transform:scale(.97);}to{transform:scale(1);}}
+.step[data-step="1"] h2{color:var(--step1);}
+.step[data-step="2"] h2{color:var(--step2);}
+.step[data-step="3"] h2{color:var(--step3);}
+.step[data-step="4"] h2{color:var(--step4);}
+.step[data-step="5"] h2{color:var(--step5);}
+.step[data-step="6"] h2{color:var(--step6);}
+
+label{font-weight:600;margin-top:8px;display:block;}
+textarea,input,select{
+  width:100%;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid #2b355c;
+  background:#050815;
+  color:var(--text);
+}
+textarea{min-height:70px;resize:vertical;}
+.row{display:flex;flex-wrap:wrap;gap:12px;}
+.col{flex:1 1 240px;}
+
+.option-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+.option-btn{
+  flex:1 1 220px;
   border-radius:12px;
+  padding:8px 10px;
+  background:#050815;
+  border:1px solid #2b355c;
+  color:#9bb4ff;
   cursor:pointer;
+  display:flex;
+  gap:8px;
+  transition:all .2s ease-out;
+  font-size:.9rem;
+}
+.option-btn.selected{
+  background:rgba(106,168,255,.15);
+  border-color:var(--accent);
+  color:var(--accent);
+  box-shadow:0 0 0 1px rgba(106,168,255,.3);
+}
+.player-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:10px;
+}
+.player-card{
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #2b355c;
+  background:#050815;
+  cursor:pointer;
+  font-size:.85rem;
   transition:all .25s ease;
 }
-.player-card:hover {
+.player-card.selected{
   border-color:var(--accent);
+  background:rgba(106,168,255,.15);
   transform:translateY(-2px);
 }
-.player-card.selected {
-  background:rgba(106,168,255,0.18);
-  border-color:var(--accent);
-}
-
-/* Metric boxes */
-.metric {
-  background:#0b1020;
-  border:1px solid rgba(255,255,255,0.08);
+.metric{
+  background:#050815;
+  padding:12px;
   border-radius:12px;
-  padding:14px;
+  border:1px solid var(--line);
   flex:1 1 160px;
 }
-.metric h4 {
-  margin:0;
-  color:var(--muted);
-}
-.metric span {
-  font-size:1.4rem;
-  font-weight:700;
-}
-
-/* Output blocks */
-.output-block {
-  background:#0b1020;
-  border:1px solid rgba(255,255,255,0.1);
+.metric h4{font-size:.9rem;margin:0 0 4px;color:var(--muted);}
+.metric span{font-size:1.2rem;font-weight:700;}
+.output-block{
+  background:#050815;
   border-radius:12px;
-  padding:16px;
+  border:1px solid var(--line);
+  padding:12px;
   white-space:pre-wrap;
+  margin-top:8px;
+}
+.flyer{
+  margin-top:10px;
+  padding:16px;
+  border-radius:14px;
+  background:#f7f7ff;
+  color:#111829;
 }
 
-/* Step visibility */
-.step {
-  display:none;
-}
-.step.active {
-  display:block;
-}
+/* steps */
+.step{display:none;}
+.step.active{display:block;}
 
+/* misc */
+.small-note{font-size:.8rem;color:var(--muted);}
+
+/* chips count tags (optional) */
+.count-tag{font-size:.8rem;color:var(--muted);margin-left:6px;}
 </style>
 </head>
-
 <body>
 
-<!-- Cinematic Background -->
-<div class="cine-bg">
-  <div class="cine-glow one"></div>
-  <div class="cine-glow two"></div>
-  <div class="cine-glow three"></div>
-</div>
+<!-- INTRO OVERLAY -->
+<div id="introOverlay" class="intro-overlay">
+  <div class="intro-bg"></div>
+  <div class="glow glow1"></div>
+  <div class="glow glow2"></div>
+  <div class="glow glow3"></div>
 
-<!-- LEFT TERMINAL NAV -->
-<div class="nav-container">
-  <div class="nav-title">COACH DASHBOARD</div>
-  <div class="nav-list">
-    <div class="nav-item" data-step="1"><span class="nav-code">[01]</span> RECRUIT</div>
-    <div class="nav-item" data-step="2"><span class="nav-code">[02]</span> TRAIN</div>
-    <div class="nav-item" data-step="3"><span class="nav-code">[03]</span> STAFF</div>
-    <div class="nav-item" data-step="4"><span class="nav-code">[04]</span> ROSTER</div>
-    <div class="nav-item" data-step="5"><span class="nav-code">[05]</span> SIMULATE</div>
-    <div class="nav-item" data-step="6"><span class="nav-code">[06]</span> REFLECT</div>
-  </div>
-</div>
-
-<!-- MAIN CONTENT -->
-<div class="main-area">
-<!-- ============================================================
-     STEP 1 — RECRUITMENT
-============================================================ -->
-<div class="step step1 active" data-step="1">
-  <div class="panel">
-    <h2>Recruitment Strategy</h2>
-
-    <label>Team Name</label>
-    <input id="teamName" placeholder="Enter your team name">
-
-    <label>Target Group</label>
-    <input id="targetGroup" placeholder="e.g., New players, high-skill DPS, strong communicators">
-
-    <h3 style="color:var(--color-step1);">Recruitment Activities (choose up to 3)</h3>
-    <div class="option-grid">
-      <div class="option-btn recOpt" data-label="Social media campaign">Social media campaign</div>
-      <div class="option-btn recOpt" data-label="In-house tournaments">In-house tournaments</div>
-      <div class="option-btn recOpt" data-label="Counselor referrals">Counselor referrals</div>
-      <div class="option-btn recOpt" data-label="Open lab nights">Open lab nights</div>
-      <div class="option-btn recOpt" data-label="Collaboration with clubs">Collaboration with clubs</div>
-      <div class="option-btn recOpt" data-label="Joint tryouts with teams">Joint tryouts with other teams</div>
+  <div class="intro-panel">
+    <div class="init-seq" id="initSeq">
+      <span>Initializing coaching interface…</span><br>
+      <span class="seq-line">Loading player analytics…</span><br>
+      <span class="seq-line">Assessing recruitment pipelines…</span><br>
+      <span class="seq-line">Syncing performance metrics…</span><br>
+      <span class="seq-line">Preparing season dashboard…</span><br>
+      <span class="seq-line final">Ready.</span><br>
     </div>
 
-    <label>Extra notes or timeline</label>
-    <textarea id="strategiesOther"></textarea>
+    <div class="intro-main" id="introMain">
+      <h1>Welcome, Coach.</h1>
+      <p>You’re stepping into the role of Head Coach for a brand-new esports program.<br>
+      Your mission: build a competitive roster that performs, grows, and thrives—without burning out.</p>
+      <p>Your decisions shape who applies, who joins the team, how well they train, and how your season ends.</p>
 
-    <h3 style="color:var(--color-step1);">Incentives (choose up to 3)</h3>
-    <div class="option-grid">
-      <div class="option-btn incOpt" data-label="Practice jerseys">Practice jerseys</div>
-      <div class="option-btn incOpt" data-label="Travel to tournaments">Travel to tournaments</div>
-      <div class="option-btn incOpt" data-label="Academic support">Academic support</div>
-      <div class="option-btn incOpt" data-label="Leadership opportunities">Leadership opportunities</div>
-    </div>
-
-    <label>Extra notes</label>
-    <textarea id="incentivesOther"></textarea>
-
-    <button onclick="generatePlan()">Generate Recruitment Plan</button>
-
-    <h3>Generated Plan</h3>
-    <div class="output-block" id="recruitmentPlanOut"></div>
-
-    <h3>Recruitment Flyer</h3>
-    <div id="flyer" class="output-block"></div>
-
-  </div>
-</div>
-
-
-<!-- ============================================================
-     STEP 2 — TRAINING
-============================================================ -->
-<div class="step step2" data-step="2">
-  <div class="panel">
-    <h2>Training Framework</h2>
-
-    <label>Preseason Strategy</label>
-    <textarea id="preseason"></textarea>
-
-    <label>Season Schedule</label>
-    <textarea id="season"></textarea>
-
-    <label>Progress Monitoring</label>
-    <textarea id="monitor"></textarea>
-
-    <button onclick="generateTraining()">Generate Training Framework</button>
-
-    <h3>Generated Training Plan</h3>
-    <div class="output-block" id="trainingOut"></div>
-
-    <hr><br>
-
-    <h3 style="color:var(--color-step2)">Training Load & Priorities</h3>
-
-    <label>Weekly Training Hours</label>
-    <select id="hours">
-      <option value="3">3 hours</option>
-      <option value="5">5 hours</option>
-      <option value="7">7 hours</option>
-      <option value="9">9 hours</option>
-    </select>
-
-    <label>Preseason Intensity</label>
-    <select id="preIntensity">
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
-      <option value="low">Low</option>
-    </select>
-
-    <h4>Training Focus</h4>
-    <div class="option-grid">
-      <label><input type="checkbox" id="tf_mech"> Mechanics training</label>
-      <label><input type="checkbox" id="tf_strat"> Strategy & VOD review</label>
-      <label><input type="checkbox" id="tf_culture"> Team culture & wellness</label>
+      <div class="intro-controls">
+        <button id="beginBtn">Start Your Season</button>
+        <button id="toggleAudio" class="audio-btn">🔊 Enable Ambient Sound</button>
+      </div>
     </div>
   </div>
 </div>
 
-
-<!-- ============================================================
-     STEP 3 — STAFF
-============================================================ -->
-<div class="step step3" data-step="3">
-  <div class="panel">
-    <h2>Staff Roles</h2>
-
-    <p>Select up to <strong>4 staff members</strong>. Each modifies team skill, cohesion, or risk.</p>
-
-    <div class="option-grid">
-      <div class="option-btn staffOpt" data-skill="10" data-cohesion="5" data-risk="0">Esports Coach</div>
-      <div class="option-btn staffOpt" data-skill="5" data-cohesion="2" data-risk="-3">Wellness Coach</div>
-      <div class="option-btn staffOpt" data-skill="8" data-cohesion="0" data-risk="0">Analyst</div>
-      <div class="option-btn staffOpt" data-skill="0" data-cohesion="12" data-risk="-5">Life Coach</div>
-      <div class="option-btn staffOpt" data-skill="6" data-cohesion="1" data-risk="-2">Nutritionist</div>
-      <div class="option-btn staffOpt" data-skill="4" data-cohesion="3" data-risk="-4">Psychologist</div>
-      <div class="option-btn staffOpt" data-skill="10" data-cohesion="-2" data-risk="4">Talent Scout</div>
+<!-- TOP PROGRESS -->
+<div class="top-bar">
+  <div class="container" style="padding-bottom:0;">
+    <div class="progress-track">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div class="step-labels">
+      <div class="step-chip" data-step-label="1"><span>1</span>Recruitment</div>
+      <div class="step-chip" data-step-label="2"><span>2</span>Training</div>
+      <div class="step-chip" data-step-label="3"><span>3</span>Staff</div>
+      <div class="step-chip" data-step-label="4"><span>4</span>Roster</div>
+      <div class="step-chip" data-step-label="5"><span>5</span>Simulate</div>
+      <div class="step-chip" data-step-label="6"><span>6</span>Reflection</div>
     </div>
   </div>
 </div>
 
+<div class="container">
+  <h1>Esports Season Builder Simulator</h1>
+  <p style="color:var(--muted);">Move step-by-step to construct your recruitment plan, training framework, staff team, roster, and final season outcome.</p>
 
-<!-- ============================================================
-     STEP 4 — ROSTER SELECTION
-============================================================ -->
-<div class="step step4" data-step="4">
-  <div class="panel">
-    <h2>Select Your Roster (Max 5 Players)</h2>
+  <!-- STEP 1 -->
+  <div class="step active" data-step="1">
+    <div class="panel">
+      <h2>1️⃣ Recruitment Plan</h2>
+      <div class="row">
+        <div class="col">
+          <label for="teamName">Team / Program Name</label>
+          <input id="teamName" placeholder="Example: Lakeside Legends"/>
+        </div>
+        <div class="col">
+          <label for="targetGroup">Target Group</label>
+          <input id="targetGroup" placeholder="Ex: New players with strong communication, or high-skill ranked players.">
+        </div>
+      </div>
 
-    <p>Player pool is generated based on your recruitment + incentive choices.</p>
+      <h3>Recruitment Activities <span id="recCountTag" class="count-tag">0 / 3</span></h3>
+      <div class="option-grid">
+        <div class="option-btn recOpt" data-label="Social media campaign">Social media campaign</div>
+        <div class="option-btn recOpt" data-label="School announcements">School announcements</div>
+        <div class="option-btn recOpt" data-label="In-house tournaments">In-house tournaments</div>
+        <div class="option-btn recOpt" data-label="Counselor referrals">Counselor referrals</div>
+        <div class="option-btn recOpt" data-label="Open lab nights">Open lab nights</div>
+        <div class="option-btn recOpt" data-label="Collaboration with clubs">Collaboration with clubs</div>
+        <div class="option-btn recOpt" data-label="Joint tryouts with other teams">Joint tryouts with other teams</div>
+      </div>
 
-    <div id="poolSummary" style="margin:10px 0; opacity:0.8;"></div>
+      <label for="strategiesOther">Additional Recruitment Notes / Timeline</label>
+      <textarea id="strategiesOther"></textarea>
 
-    <div class="player-grid" id="playerGrid"></div>
+      <h3>Incentives & Benefits <span id="incCountTag" class="count-tag">0 / 3</span></h3>
+      <div class="option-grid">
+        <div class="option-btn incOpt" data-label="Practice jerseys">Practice jerseys</div>
+        <div class="option-btn incOpt" data-label="Travel to tournaments">Travel to tournaments</div>
+        <div class="option-btn incOpt" data-label="Academic support">Academic support</div>
+        <div class="option-btn incOpt" data-label="Leadership opportunities">Leadership opportunities</div>
+      </div>
 
-  </div>
-</div>
+      <label for="incentivesOther">Other Incentives (optional)</label>
+      <textarea id="incentivesOther"></textarea>
 
+      <button type="button" onclick="generatePlan()">Generate Written Plan & Flyer</button>
+      <div id="recruitmentPlanOut" class="output-block"></div>
 
-<!-- ============================================================
-     STEP 5 — SIMULATION
-============================================================ -->
-<div class="step step5" data-step="5">
-  <div class="panel">
-    <h2>Season Simulation</h2>
-
-    <button onclick="runSimulation()">Run Season</button>
-
-    <h3 style="margin-top:20px;">Season Metrics</h3>
-    <div style="display:flex; gap:14px; flex-wrap:wrap;">
-      <div class="metric"><h4>Skill</h4><span id="m_skill">–</span></div>
-      <div class="metric"><h4>Cohesion</h4><span id="m_cohesion">–</span></div>
-      <div class="metric"><h4>Risk</h4><span id="m_risk">–</span></div>
+      <h3>Recruitment Flyer Preview</h3>
+      <div id="flyer" class="flyer"></div>
     </div>
+  </div>
 
-    <h3>Outcome</h3>
-    <div id="outcomeSummary" class="output-block"></div>
+  <!-- STEP 2 -->
+  <div class="step" data-step="2">
+    <div class="panel">
+      <h2>2️⃣ Training Framework</h2>
+      <div class="row">
+        <div class="col">
+          <label for="preIntensity">Pre-season Intensity</label>
+          <select id="preIntensity">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+        <div class="col">
+          <label for="hours">Weekly Training Hours</label>
+          <select id="hours">
+            <option value="3">3</option>
+            <option value="5" selected>5</option>
+            <option value="7">7</option>
+            <option value="9">9</option>
+          </select>
+        </div>
+      </div>
 
+      <h3>Training Focus</h3>
+      <div>
+        <label><input type="checkbox" id="tf_mech"> Mechanics training</label><br>
+        <label><input type="checkbox" id="tf_strat"> Strategy & VOD review</label><br>
+        <label><input type="checkbox" id="tf_culture"> Team culture & wellness</label>
+      </div>
+
+      <label for="preseason">Pre-season Activities</label>
+      <textarea id="preseason"></textarea>
+
+      <label for="season">Season Schedule</label>
+      <textarea id="season"></textarea>
+
+      <label for="monitor">Progress Monitoring</label>
+      <textarea id="monitor"></textarea>
+
+      <button type="button" onclick="generateTraining()">Generate Training Framework</button>
+      <div id="trainingOut" class="output-block"></div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step" data-step="3">
+    <div class="panel">
+      <h2>3️⃣ Staff & Support Team</h2>
+      <p style="color:var(--muted);">Head Coach (you) is assumed. Select up to 4 additional staff.</p>
+
+      <h3>Staff Roles</h3>
+      <div class="option-grid">
+        <div class="option-btn staffOpt" data-skill="10" data-cohesion="5">Esports Coach</div>
+        <div class="option-btn staffOpt" data-skill="5" data-cohesion="2">Wellness Coach</div>
+        <div class="option-btn staffOpt" data-skill="8" data-cohesion="0">Analyst</div>
+        <div class="option-btn staffOpt" data-skill="0" data-cohesion="12">Life Coach</div>
+        <div class="option-btn staffOpt" data-skill="6" data-cohesion="1">Nutritionist</div>
+        <div class="option-btn staffOpt" data-skill="4" data-cohesion="3">Psychologist</div>
+        <div class="option-btn staffOpt" data-skill="10" data-cohesion="-2">Talent Scout</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step" data-step="4">
+    <div class="panel">
+      <h2>4️⃣ Player Pool & Roster Selection</h2>
+      <p style="color:var(--muted);">Recruitment and incentive choices shape which 8 players show up. Select exactly 5.</p>
+      <p id="poolSummary" class="small-note"></p>
+      <div id="playerGrid" class="player-grid"></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step" data-step="5">
+    <div class="panel">
+      <h2>5️⃣ Season Simulation</h2>
+      <button onclick="runSimulation()">Simulate Season</button>
+
+      <div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:12px;">
+        <div class="metric"><h4>Skill</h4><span id="m_skill">–</span></div>
+        <div class="metric"><h4>Cohesion</h4><span id="m_cohesion">–</span></div>
+        <div class="metric"><h4>Risk</h4><span id="m_risk">–</span></div>
+      </div>
+
+      <h3>Season Outcome</h3>
+      <div id="outcomeSummary" class="output-block"></div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step" data-step="6">
+    <div class="panel">
+      <h2>6️⃣ Reflection</h2>
+
+      <label>1. How did your recruitment choices align with your focus?</label>
+      <textarea id="ref1"></textarea>
+
+      <label>2. How did training & staff decisions affect the outcome?</label>
+      <textarea id="ref2"></textarea>
+
+      <label>3. What changes would you make next season?</label>
+      <textarea id="ref3"></textarea>
+
+      <label>4. Connections to real esports coaching:</label>
+      <textarea id="ref4"></textarea>
+
+      <button onclick="generateReflection()">Generate Reflection</button>
+      <div id="reflectionOut" class="output-block"></div>
+    </div>
+  </div>
+
+</div><!-- container -->
+
+<!-- BOTTOM NAV -->
+<div class="nav-bar">
+  <div class="nav-inner">
+    <div id="stepCounter" class="step-counter">Step 1 of 6 · Recruitment</div>
+    <div class="nav-buttons">
+      <button id="prevBtn" class="btn-secondary" onclick="changeStep(-1)" disabled>Back</button>
+      <button id="nextBtn" onclick="changeStep(1)">Next</button>
+    </div>
   </div>
 </div>
 
-
-<!-- ============================================================
-     STEP 6 — REFLECTION
-============================================================ -->
-<div class="step step6" data-step="6">
-  <div class="panel">
-    <h2>Final Reflection</h2>
-
-    <label>1. How did your recruitment focus match the players you attracted?</label>
-    <textarea id="ref1"></textarea>
-
-    <label>2. How did training and staff decisions influence the results?</label>
-    <textarea id="ref2"></textarea>
-
-    <label>3. What would you change for next season?</label>
-    <textarea id="ref3"></textarea>
-
-    <label>4. How does this relate to real esports coaching?</label>
-    <textarea id="ref4"></textarea>
-
-    <button onclick="generateReflection()">Generate Reflection</button>
-
-    <h3>Your Reflection</h3>
-    <div class="output-block" id="reflectionOut"></div>
-  </div>
-</div>
-
-</div> <!-- END MAIN AREA -->
-
-
-<!-- ============================================================
-     JAVASCRIPT — FULL LOGIC
-============================================================ -->
 <script>
-/* Smooth scrolling and nav handling */
-const steps = document.querySelectorAll('.step');
-const navItems = document.querySelectorAll('.nav-item');
+/* ---------- Intro logic ---------- */
+const initSeqLines = document.querySelectorAll(".seq-line");
+const introMain = document.getElementById("introMain");
+const introOverlay = document.getElementById("introOverlay");
+let introAudio = new Audio();
+introAudio.src = "https://cdn.pixabay.com/download/audio/2022/03/03/audio_25aa8d8f93.mp3?filename=cyberpunk-ambient-110386.mp3";
+introAudio.loop = true;
+introAudio.volume = 0.4;
 
-navItems.forEach(item=>{
-  item.addEventListener('click',()=>{
-    const step = item.dataset.step;
+document.getElementById("toggleAudio").addEventListener("click", () => {
+  if (introAudio.paused) {
+    introAudio.play();
+    document.getElementById("toggleAudio").textContent = "🔇 Disable Ambient Sound";
+  } else {
+    introAudio.pause();
+    document.getElementById("toggleAudio").textContent = "🔊 Enable Ambient Sound";
+  }
+});
 
-    navItems.forEach(n=>n.classList.remove('active'));
-    item.classList.add('active');
+function runInitSequence() {
+  let delay = 600;
+  initSeqLines.forEach(line => {
+    setTimeout(()=>{ line.style.opacity = 1; }, delay);
+    delay += 600;
+  });
+  setTimeout(()=>{
+    introMain.style.opacity = 1;
+    introMain.style.transform = "translateY(0)";
+  }, delay + 400);
+}
+document.getElementById("beginBtn").addEventListener("click", () => {
+  introOverlay.classList.add("fade-out");
+  introAudio.pause(); // stop after intro
+  setTimeout(()=> introOverlay.remove(), 750);
+});
+window.addEventListener("load", runInitSequence);
 
-    steps.forEach(s=>s.classList.remove('active'));
-    document.querySelector('.step'+step).classList.add('active');
+/* ---------- Step navigation ---------- */
+let currentStep = 1;
+const totalSteps = 6;
+const chips = document.querySelectorAll(".step-chip");
 
-    document.querySelector('.main-area').scrollTo({ top:0, behavior:'smooth' });
+function updateStepUI() {
+  document.querySelectorAll(".step").forEach(step=>step.classList.remove("active"));
+  document.querySelector(`.step[data-step="${currentStep}"]`).classList.add("active");
 
-    if(step == "4"){
-      buildAvailablePlayerPool();
-      renderPlayerGrid();
-      summarizePool();
+  const pct = (currentStep - 1)/(totalSteps - 1)*100;
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  chips.forEach(chip=>{
+    const s = parseInt(chip.getAttribute("data-step-label"));
+    chip.classList.remove("active","completed");
+    if (s < currentStep) chip.classList.add("completed");
+    if (s === currentStep) chip.classList.add("active");
+  });
+
+  document.getElementById("prevBtn").disabled = currentStep === 1;
+  document.getElementById("nextBtn").disabled = currentStep === 6;
+
+  const labels = ["Recruitment","Training","Staff","Roster","Simulate","Reflection"];
+  document.getElementById("stepCounter").textContent =
+    `Step ${currentStep} of 6 · ${labels[currentStep-1]}`;
+
+  if (currentStep === 4) {
+    buildAvailablePlayerPool();
+    renderPlayerGrid();
+    summarizePool();
+  }
+}
+function changeStep(delta){
+  const newStep = currentStep + delta;
+  if(newStep < 1 || newStep > totalSteps) return;
+  currentStep = newStep;
+  updateStepUI();
+}
+updateStepUI();
+
+/* ---------- Option buttons with limits ---------- */
+function updateCounts(){
+  document.getElementById("recCountTag").textContent =
+    `${document.querySelectorAll(".recOpt.selected").length} / 3`;
+  document.getElementById("incCountTag").textContent =
+    `${document.querySelectorAll(".incOpt.selected").length} / 3`;
+}
+document.querySelectorAll(".option-btn").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    let group;
+    if (btn.classList.contains("recOpt")) group = ".recOpt";
+    else if (btn.classList.contains("incOpt")) group = ".incOpt";
+    else if (btn.classList.contains("staffOpt")) group = ".staffOpt";
+
+    const isSelected = btn.classList.contains("selected");
+    if (group === ".recOpt" || group === ".incOpt") {
+      const selected = document.querySelectorAll(group+".selected").length;
+      if (!isSelected && selected >= 3) return;
     }
+    if (group === ".staffOpt") {
+      const selected = document.querySelectorAll(group+".selected").length;
+      if (!isSelected && selected >= 4) return;
+    }
+    btn.classList.toggle("selected");
+    updateCounts();
   });
 });
 
-
-/* Utility: update selection counts */
-function updateCounts(){}
-
-
-/* ============================================================
-   PLAYER POOL GENERATION
-============================================================ */
+/* ---------- 30-player pool with backgrounds ---------- */
 const playerPool = [
-  {
-    id:1, name:"Apex", role:"Flex",
-    mech:92, iq:78, comm:70, team:65, commit:80, toxic:30,
-    background:"Former console grinder turned PC competitor.",
-    motivation:"Wants to prove they're elite without formal coaching.",
-    personality:"Confident, fearless.",
-    preferences:"Fast-paced comps, aggressive flanks."
-  },
-  {
-    id:2, name:"Shadow", role:"DPS",
-    mech:95, iq:72, comm:55, team:52, commit:70, toxic:60,
-    background:"Ranked-only superstar.",
-    motivation:"Wants highlights and personal brand growth.",
-    personality:"Flashy, ego-driven.",
-    preferences:"Assassin/duelist heroes, high-risk plays."
-  },
-  {
-    id:3, name:"FrostByte", role:"Tank",
-    mech:75, iq:88, comm:82, team:90, commit:85, toxic:12,
-    background:"Captain of wrestling team.",
-    motivation:"Wants structure and teamwork.",
-    personality:"Calm, composed.",
-    preferences:"Shield tanks, objective-based play."
-  },
-  {
-    id:4, name:"Nova", role:"Support",
-    mech:68, iq:85, comm:88, team:92, commit:95, toxic:5,
-    background:"Peer mentor & helper personality.",
-    motivation:"Wants to support teammates and grow culture.",
-    personality:"Empathetic, patient.",
-    preferences:"Healing/backline supports."
-  },
-  {
-    id:5, name:"Blitz", role:"DPS",
-    mech:89, iq:70, comm:58, team:55, commit:82, toxic:40,
-    background:"Track runner with insane reaction time.",
-    motivation:"Craves high-stakes LAN matches.",
-    personality:"Energetic, eager.",
-    preferences:"Entry fraggers, mobility heroes."
-  },
-  {
-    id:6, name:"Circuit", role:"Flex",
-    mech:78, iq:80, comm:84, team:76, commit:87, toxic:15,
-    background:"STEM club analyst.",
-    motivation:"Loves analytics and patch development.",
-    personality:"Curious, thoughtful.",
-    preferences:"Utility, adaptive roles."
-  },
-  {
-    id:7, name:"Harpy", role:"Support",
-    mech:70, iq:83, comm:85, team:88, commit:60, toxic:25,
-    background:"School ambassador, strong people skills.",
-    motivation:"Wants community and social connection.",
-    personality:"Warm, extroverted.",
-    preferences:"Vision control supports."
-  },
-  {
-    id:8, name:"Crank", role:"Tank",
-    mech:65, iq:67, comm:50, team:52, commit:55, toxic:70,
-    background:"Solo queue warrior.",
-    motivation:"Wants validation.",
-    personality:"Volatile, emotional.",
-    preferences:"Dive tanks, chaos-based play."
-  },
-  {
-    id:9, name:"Spectre", role:"DPS",
-    mech:90, iq:90, comm:72, team:60, commit:75, toxic:20,
-    background:"Chess competitor.",
-    motivation:"Wants mental challenge at high speed.",
-    personality:"Quiet, analytical.",
-    preferences:"Snipers, precise burst heroes."
-  },
-  {
-    id:10, name:"Atlas", role:"Tank",
-    mech:82, iq:88, comm:79, team:85, commit:90, toxic:10,
-    background:"Football lineman.",
-    motivation:"Wants leadership role.",
-    personality:"Protective, steady.",
-    preferences:"Peel tanks, protect-the-carry comps."
-  },
+  {id:1,name:"Apex",role:"Flex",mech:92,iq:78,comm:70,team:65,commit:80,toxic:30,
+   background:"Former console grinder turned PC competitor.",
+   motivation:"Wants to prove they're elite without formal coaching.",
+   personality:"Confident, fearless.",
+   preferences:"Fast-paced comps, aggressive flanks."},
+  {id:2,name:"Shadow",role:"DPS",mech:95,iq:72,comm:55,team:52,commit:70,toxic:60,
+   background:"Ranked-only superstar.",
+   motivation:"Wants highlights and personal brand growth.",
+   personality:"Flashy, ego-driven.",
+   preferences:"Assassin/duelist heroes, high-risk plays."},
+  {id:3,name:"FrostByte",role:"Tank",mech:75,iq:88,comm:82,team:90,commit:85,toxic:12,
+   background:"Captain of wrestling team.",
+   motivation:"Wants structure and teamwork.",
+   personality:"Calm, composed, supportive.",
+   preferences:"Shield tanks, objective-based play."},
+  {id:4,name:"Nova",role:"Support",mech:68,iq:85,comm:88,team:92,commit:95,toxic:5,
+   background:"Peer mentor & helper personality.",
+   motivation:"Wants to support teammates and grow culture.",
+   personality:"Empathetic, patient, selfless.",
+   preferences:"Healing/backline supports."},
+  {id:5,name:"Blitz",role:"DPS",mech:89,iq:70,comm:58,team:55,commit:82,toxic:40,
+   background:"Track runner with insane reaction time.",
+   motivation:"Craves high-stakes LAN matches.",
+   personality:"Energetic, eager.",
+   preferences:"Entry fraggers, mobility heroes."},
+  {id:6,name:"Circuit",role:"Flex",mech:78,iq:80,comm:84,team:76,commit:87,toxic:15,
+   background:"STEM club analyst.",
+   motivation:"Loves analytics and patch development.",
+   personality:"Curious, thoughtful, calm.",
+   preferences:"Utility, adaptive roles."},
+  {id:7,name:"Harpy",role:"Support",mech:70,iq:83,comm:85,team:88,commit:60,toxic:25,
+   background:"School ambassador, strong people skills.",
+   motivation:"Wants community and social connection.",
+   personality:"Warm, extroverted.",
+   preferences:"Vision control supports."},
+  {id:8,name:"Crank",role:"Tank",mech:65,iq:67,comm:50,team:52,commit:55,toxic:70,
+   background:"Solo queue warrior.",
+   motivation:"Wants validation.",
+   personality:"Chaotic, emotional.",
+   preferences:"Dive tanks, chaos-based play."},
+  {id:9,name:"Spectre",role:"DPS",mech:90,iq:90,comm:72,team:60,commit:75,toxic:20,
+   background:"Chess competitor.",
+   motivation:"Wants mental challenge at high speed.",
+   personality:"Quiet, analytical.",
+   preferences:"Snipers, precise burst heroes."},
+  {id:10,name:"Atlas",role:"Tank",mech:82,iq:88,comm:79,team:85,commit:90,toxic:10,
+   background:"Football lineman.",
+   motivation:"Wants leadership role.",
+   personality:"Protective, steady, supportive.",
+   preferences:"Peel tanks, protect-the-carry comps."},
 
-  /* ---------------- NEW PLAYERS FOR EXPANDED POOL ---------------- */
+  {id:11,name:"Pixel",role:"Support",mech:74,iq:92,comm:90,team:88,commit:77,toxic:5,
+   background:"Robotics club strategist.",
+   motivation:"Wants to coordinate macro play.",
+   personality:"Organized, precise.",
+   preferences:"Utility-heavy supports."},
+  {id:12,name:"Raze",role:"DPS",mech:96,iq:75,comm:60,team:58,commit:68,toxic:45,
+   background:"Streamer with small following.",
+   motivation:"Wants exposure.",
+   personality:"Showy, unpredictable.",
+   preferences:"Explosive DPS with AoE burst."},
+  {id:13,name:"Kelso",role:"Tank",mech:67,iq:70,comm:65,team:62,commit:72,toxic:35,
+   background:"New to esports but hyper-dedicated.",
+   motivation:"Wants to improve rapidly.",
+   personality:"Determined, hard-working.",
+   preferences:"Simple, sturdy tanks."},
+  {id:14,name:"Vexa",role:"Flex",mech:80,iq:83,comm:77,team:79,commit:92,toxic:8,
+   background:"Debate team standout.",
+   motivation:"Wants structured tactical play.",
+   personality:"Persuasive, composed.",
+   preferences:"Flexible off-meta picks."},
+  {id:15,name:"Jolt",role:"DPS",mech:94,iq:74,comm:68,team:67,commit:60,toxic:55,
+   background:"Arcade machine prodigy.",
+   motivation:"Loves fast-paced combat.",
+   personality:"Hyperactive, chaotic.",
+   preferences:"Rushdown DPS heroes."},
+  {id:16,name:"Rune",role:"Support",mech:65,iq:89,comm:90,team:90,commit:95,toxic:3,
+   background:"Volunteers in tutoring center.",
+   motivation:"Wants to help others succeed.",
+   personality:"Calm, selfless, empathetic.",
+   preferences:"Healing over DPS supports."},
+  {id:17,name:"Grim",role:"DPS",mech:91,iq:85,comm:58,team:50,commit:74,toxic:50,
+   background:"Online tournament grinder.",
+   motivation:"Wants recognition.",
+   personality:"Brooding, intense.",
+   preferences:"High-precision DPS."},
+  {id:18,name:"Piper",role:"Flex",mech:76,iq:82,comm:84,team:85,commit:86,toxic:12,
+   background:"Band percussionist with rhythm mastery.",
+   motivation:"Wants team communication synergy.",
+   personality:"Friendly, rhythmic thinker.",
+   preferences:"Combo-based heroes requiring timing."},
+  {id:19,name:"Tempo",role:"Support",mech:72,iq:91,comm:95,team:93,commit:84,toxic:6,
+   background:"Choir section leader.",
+   motivation:"Wants to harmonize team comms.",
+   personality:"Musical, empathetic.",
+   preferences:"Tempo-control supports."},
+  {id:20,name:"Knox",role:"Tank",mech:79,iq:76,comm:60,team:68,commit:77,toxic:20,
+   background:"Powerlifting enthusiast.",
+   motivation:"Wants to be frontline hero.",
+   personality:"Tough, straightforward.",
+   preferences:"Bruiser tanks."},
 
-  {
-    id:11, name:"Pixel", role:"Support",
-    mech:74, iq:92, comm:90, team:88, commit:77, toxic:5,
-    background:"Robotics club strategist.",
-    motivation:"Wants to help coordinate macro play.",
-    personality:"Organized, precise.",
-    preferences:"Cooldown-reliant supports, utility-heavy roles."
-  },
-  {
-    id:12, name:"Raze", role:"DPS",
-    mech:96, iq:75, comm:60, team:58, commit:68, toxic:45,
-    background:"Streamer with small following.",
-    motivation:"Wants exposure.",
-    personality:"Showy, unpredictable.",
-    preferences:"Explosive DPS with AoE burst."
-  },
-  {
-    id:13, name:"Kelso", role:"Tank",
-    mech:67, iq:70, comm:65, team:62, commit:72, toxic:35,
-    background:"New to esports but hyper-dedicated.",
-    motivation:"Wants to improve rapidly.",
-    personality:"Determined, hard-working.",
-    preferences:"Simple, sturdy tank heroes."
-  },
-  {
-    id:14, name:"Vexa", role:"Flex",
-    mech:80, iq:83, comm:77, team:79, commit:92, toxic:8,
-    background:"Debate team standout.",
-    motivation:"Wants structured improvement and tactical play.",
-    personality:"Persuasive, composed.",
-    preferences:"Flexible off-meta picks."
-  },
-  {
-    id:15, name:"Jolt", role:"DPS",
-    mech:94, iq:74, comm:68, team:67, commit:60, toxic:55,
-    background:"Arcade machine prodigy.",
-    motivation:"Loves fast-paced combat.",
-    personality:"Hyperactive, chaotic neutral.",
-    preferences:"Rushdown DPS heroes."
-  },
-  {
-    id:16, name:"Rune", role:"Support",
-    mech:65, iq:89, comm:90, team:90, commit:95, toxic:3,
-    background:"Volunteers in tutoring center.",
-    motivation:"Wants to help others succeed.",
-    personality:"Calm, selfless.",
-    preferences:"Healing over DPS supports."
-  },
-  {
-    id:17, name:"Grim", role:"DPS",
-    mech:91, iq:85, comm:58, team:50, commit:74, toxic:50,
-    background:"Online tournament grinder.",
-    motivation:"Wants recognition.",
-    personality:"Brooding, intense.",
-    preferences:"High-precision DPS."
-  },
-    {
-    id:18, name:"Piper", role:"Flex",
-    mech:76, iq:82, comm:84, team:85, commit:86, toxic:12,
-    background:"Band percussionist with rhythm mastery.",
-    motivation:"Wants team communication synergy.",
-    personality:"Friendly, rhythmic thinker.",
-    preferences:"Combo-based heroes requiring timing."
-  },
-  {
-    id:19, name:"Tempo", role:"Support",
-    mech:72, iq:91, comm:95, team:93, commit:84, toxic:6,
-    background:"Choir section leader.",
-    motivation:"Wants to harmonize team communication.",
-    personality:"Musical, empathetic.",
-    preferences:"Tempo-control supports."
-  },
-  {
-    id:20, name:"Knox", role:"Tank",
-    mech:79, iq:76, comm:60, team:68, commit:77, toxic:20,
-    background:"Powerlifting enthusiast.",
-    motivation:"Wants to be the frontline hero.",
-    personality:"Tough, straightforward.",
-    preferences:"Bruiser tanks."
-  },
+  {id:21,name:"Lyric",role:"DPS",mech:88,iq:82,comm:70,team:64,commit:78,toxic:18,
+   background:"Digital art student.",
+   motivation:"Wants creative expression in gameplay.",
+   personality:"Artistic, introspective.",
+   preferences:"Stylish DPS with mobility."},
+  {id:22,name:"Striker",role:"DPS",mech:97,iq:71,comm:52,team:55,commit:65,toxic:62,
+   background:"Aim-lab grinder.",
+   motivation:"Wants to prove aim > strategy.",
+   personality:"Cocky, lone-wolf.",
+   preferences:"One-shot heroes."},
+  {id:23,name:"Patch",role:"Support",mech:60,iq:87,comm:92,team:95,commit:90,toxic:2,
+   background:"Coding club helper.",
+   motivation:"Wants to enable optimal play.",
+   personality:"Helpful, gentle, selfless.",
+   preferences:"Buff/debuff utility supports."},
+  {id:24,name:"Forge",role:"Tank",mech:82,iq:82,comm:78,team:80,commit:88,toxic:15,
+   background:"Construction program student.",
+   motivation:"Wants to build structure for the team.",
+   personality:"Solid, dependable, protective.",
+   preferences:"Heavy tanks that anchor fights."},
+  {id:25,name:"Mira",role:"Flex",mech:77,iq:84,comm:79,team:81,commit:92,toxic:6,
+   background:"Dance choreographer.",
+   motivation:"Loves synchronized team movement.",
+   personality:"Expressive, disciplined.",
+   preferences:"Heroes requiring rhythm & timing."},
 
-  {
-    id:21, name:"Lyric", role:"DPS",
-    mech:88, iq:82, comm:70, team:64, commit:78, toxic:18,
-    background:"Digital art student.",
-    motivation:"Wants creative expression in gameplay.",
-    personality:"Artistic, introspective.",
-    preferences:"Stylish DPS with mobility."
-  },
-  {
-    id:22, name:"Striker", role:"DPS",
-    mech:97, iq:71, comm:52, team:55, commit:65, toxic:62,
-    background:"Aim-lab grinder.",
-    motivation:"Wants to prove aim > strategy.",
-    personality:"Cocky, lone-wolf.",
-    preferences:"One-shot heroes."
-  },
-  {
-    id:23, name:"Patch", role:"Support",
-    mech:60, iq:87, comm:92, team:95, commit:90, toxic:2,
-    background:"Coding club helper.",
-    motivation:"Wants to enable optimal play.",
-    personality:"Helpful, gentle.",
-    preferences:"Buff/debuff utility supports."
-  },
-  {
-    id:24, name:"Forge", role:"Tank",
-    mech:82, iq:82, comm:78, team:80, commit:88, toxic:15,
-    background:"Construction program student.",
-    motivation:"Wants to build structure for his team.",
-    personality:"Solid, dependable.",
-    preferences:"Heavy tanks that anchor fights."
-  },
-  {
-    id:25, name:"Mira", role:"Flex",
-    mech:77, iq:84, comm:79, team:81, commit:92, toxic:6,
-    background:"Dance choreographer.",
-    motivation:"Loves synchronized team movement.",
-    personality:"Expressive, disciplined.",
-    preferences:"Heroes requiring rhythm & timing."
-  },
-
-  {
-    id:26, name:"Gadget", role:"Support",
-    mech:58, iq:93, comm:89, team:87, commit:91, toxic:4,
-    background:"Future engineer.",
-    motivation:"Wants to optimize team systems.",
-    personality:"Inventive, detail-oriented.",
-    preferences:"Tech-heavy supports."
-  },
-  {
-    id:27, name:"Rift", role:"DPS",
-    mech:93, iq:88, comm:65, team:55, commit:73, toxic:38,
-    background:"VR competitive player.",
-    motivation:"Wants cross-platform mastery.",
-    personality:"Experimental, boundary-pushing.",
-    preferences:"High-mobility DPS heroes."
-  },
-  {
-    id:28, name:"Koda", role:"Tank",
-    mech:81, iq:79, comm:80, team:82, commit:84, toxic:10,
-    background:"Former hockey goalie.",
-    motivation:"Wants to protect his teammates.",
-    personality:"Stoic, protective.",
-    preferences:"Damage mitigation tanks."
-  },
-  {
-    id:29, name:"Bitsy", role:"Flex",
-    mech:74, iq:90, comm:85, team:89, commit:88, toxic:7,
-    background:"Chess + robotics dual competitor.",
-    motivation:"Wants strategic, adaptable play.",
-    personality:"Clever, cooperative.",
-    preferences:"Off-meta synergies."
-  },
-  {
-    id:30, name:"Rumble", role:"DPS",
-    mech:90, iq:77, comm:63, team:60, commit:72, toxic:50,
-    background:"Skate park daredevil.",
-    motivation:"Wants adrenaline and crowd hype.",
-    personality:"Wild, competitive.",
-    preferences:"Explosive DPS with risky engages."
-  }
+  {id:26,name:"Gadget",role:"Support",mech:58,iq:93,comm:89,team:87,commit:91,toxic:4,
+   background:"Future engineer.",
+   motivation:"Wants to optimize team systems.",
+   personality:"Inventive, detail-oriented.",
+   preferences:"Tech-heavy supports."},
+  {id:27,name:"Rift",role:"DPS",mech:93,iq:88,comm:65,team:55,commit:73,toxic:38,
+   background:"VR competitive player.",
+   motivation:"Wants cross-platform mastery.",
+   personality:"Experimental, boundary-pushing.",
+   preferences:"High-mobility DPS heroes."},
+  {id:28,name:"Koda",role:"Tank",mech:81,iq:79,comm:80,team:82,commit:84,toxic:10,
+   background:"Former hockey goalie.",
+   motivation:"Wants to protect teammates.",
+   personality:"Stoic, protective.",
+   preferences:"Damage mitigation tanks."},
+  {id:29,name:"Bitsy",role:"Flex",mech:74,iq:90,comm:85,team:89,commit:88,toxic:7,
+   background:"Chess + robotics dual competitor.",
+   motivation:"Wants strategic, adaptable play.",
+   personality:"Clever, cooperative.",
+   preferences:"Off-meta synergies."},
+  {id:30,name:"Rumble",role:"DPS",mech:90,iq:77,comm:63,team:60,commit:72,toxic:50,
+   background:"Skate park daredevil.",
+   motivation:"Wants adrenaline and crowd hype.",
+   personality:"Wild, competitive, emotional.",
+   preferences:"Explosive DPS with risky engages."}
 ];
-
 
 let availablePlayerPool = [];
 
-
-/* Recruitment logic */
 function buildAvailablePlayerPool(){
   const rec = [...document.querySelectorAll(".recOpt.selected")].map(b=>b.dataset.label);
   const inc = [...document.querySelectorAll(".incOpt.selected")].map(b=>b.dataset.label);
-
   availablePlayerPool = [];
 
   playerPool.forEach(p=>{
     let interest = 50;
 
-    // Recruitment effects
+    // recruitment influence
     rec.forEach(r=>{
       if(r.includes("Social")) interest += (p.mech - 75)/5;
       if(r.includes("In-house")) interest += (p.commit - 70)/5;
@@ -818,7 +856,7 @@ function buildAvailablePlayerPool(){
       if(r.includes("Joint")) interest += (p.iq - 75)/5;
     });
 
-    // Incentives
+    // incentives
     inc.forEach(i=>{
       if(i.includes("Academic")) interest += (p.commit - 75)/5 - (p.toxic - 20)/5;
       if(i.includes("Travel")) interest += (p.mech - 80)/5;
@@ -832,295 +870,214 @@ function buildAvailablePlayerPool(){
   availablePlayerPool = sorted.slice(0,8);
 }
 
-
-/* Player grid */
 function renderPlayerGrid(){
   const grid = document.getElementById("playerGrid");
-  grid.innerHTML="";
-
+  grid.innerHTML = "";
   availablePlayerPool.forEach(p=>{
     const div = document.createElement("div");
-    div.className="player-card";
-    div.dataset.id=p.id;
-
-div.innerHTML = `
-  <strong>${p.name}</strong><br>
-  <em>${p.role}</em><br><br>
-  <strong>Background:</strong> ${p.background}<br>
-  <strong>Motivation:</strong> ${p.motivation}<br><br>
-  <strong>Stats:</strong><br>
-  Mech ${p.mech} | IQ ${p.iq}<br>
-  Comm ${p.comm} | Team ${p.team}<br>
-  Commit ${p.commit} | Toxic ${p.toxic}
-`;
-
+    div.className = "player-card";
+    div.dataset.id = p.id;
+    const pers = p.personality || "";
+    div.innerHTML = `
+      <strong>${p.name}</strong> <em>(${p.role})</em><br><br>
+      <strong>Background:</strong> ${p.background}<br>
+      <strong>Motivation:</strong> ${p.motivation}<br><br>
+      <strong>Stats:</strong><br>
+      Mech ${p.mech} | IQ ${p.iq}<br>
+      Comm ${p.comm} | Team ${p.team}<br>
+      Commit ${p.commit} | Toxic ${p.toxic}
+    `;
     div.onclick = ()=>{
-      const selected = document.querySelectorAll(".player-card.selected").length;
-      if(!div.classList.contains("selected") && selected>=5) return;
+      const count = document.querySelectorAll(".player-card.selected").length;
+      if(!div.classList.contains("selected") && count >= 5) return;
       div.classList.toggle("selected");
     };
-
     grid.appendChild(div);
   });
 }
 
-
-/* Pool summary */
 function summarizePool(){
   const pool = availablePlayerPool;
+  if(!pool.length){
+    document.getElementById("poolSummary").textContent = "";
+    return;
+  }
   const avg = v=>Math.round(pool.reduce((a,b)=>a+b[v],0)/pool.length);
   document.getElementById("poolSummary").innerHTML =
-    `AVG → Mech ${avg("mech")}, IQ ${avg("iq")}, Comm ${avg("comm")}, Toxic ${avg("toxic")}`;
+    `Your player pool (top 8 interested): AVG Mech ${avg("mech")}, IQ ${avg("iq")}, Comm ${avg("comm")}, Toxic ${avg("toxic")}.`;
 }
 
-
-/* ============================================================
-   GENERATE PLAN & TRAINING
-============================================================ */
+/* ---------- Plan & Training ---------- */
 function generatePlan(){
-  const name = document.getElementById("teamName").value;
+  const name = document.getElementById("teamName").value || "Our Team";
   const target = document.getElementById("targetGroup").value;
-
   const rec = [...document.querySelectorAll(".recOpt.selected")].map(x=>x.dataset.label);
   const inc = [...document.querySelectorAll(".incOpt.selected")].map(x=>x.dataset.label);
-
   const plan =
 `ESPORTS RECRUITMENT PLAN
-Team: ${name}
+Team Name:
+${name}
 
-Target: ${target}
+Target Group:
+${target}
 
-Recruitment:
+Recruitment Activities:
 - ${rec.join("\n- ")}
 
-Incentives:
+Incentives & Benefits:
 - ${inc.join("\n- ")}
 
+Additional Notes:
+${document.getElementById("strategiesOther").value}
+${document.getElementById("incentivesOther").value}
+
 Timeline:
-Week 1 — Campaign
-Week 2 — Meeting
-Week 3 — Tryouts
-Week 4 — Final roster
+Week 1 – Launch campaign
+Week 2 – Interest meeting
+Week 3 – Tryouts
+Week 4 – Final roster
 `;
-
   document.getElementById("recruitmentPlanOut").textContent = plan;
-
   document.getElementById("flyer").innerHTML =
-    `<h2>${name} — Now Recruiting!</h2>
-     <p><strong>Who We're Looking For:</strong> ${target}</p>
-     <p><strong>Why Join:</strong> ${inc.join(", ")}</p>
-     <p><strong>Apply:</strong> Attend tryouts or complete interest form</p>`;
+    `<h2>${name} – We’re Recruiting!</h2>
+     <p><strong>Who We Want:</strong><br>${target}</p>
+     <p><strong>Why Join:</strong><br>${inc.join(", ")}</p>
+     <p><strong>How to Apply:</strong><br>Attend tryouts or fill out our interest form.</p>`;
 }
-
 
 function generateTraining(){
-  const p=document.getElementById("preseason").value;
-  const s=document.getElementById("season").value;
-  const m=document.getElementById("monitor").value;
-
+  const preseason = document.getElementById("preseason").value;
+  const season = document.getElementById("season").value;
+  const monitor = document.getElementById("monitor").value;
   document.getElementById("trainingOut").textContent =
 `TRAINING FRAMEWORK
+===================
+Preseason Plan:
+${preseason}
 
-Preseason:
-${p}
+Season Schedule:
+${season}
 
-Season:
-${s}
-
-Monitoring:
-${m}`;
+Progress Monitoring:
+${monitor}
+`;
 }
 
-
-/* ============================================================
-   SIMULATION
-============================================================ */
-function runSimulation() {
+/* ---------- Simulation with new risk model ---------- */
+function runSimulation(){
   const roster = [...document.querySelectorAll(".player-card.selected")]
-    .map(div => availablePlayerPool.find(p => p.id == div.dataset.id));
-
-  if (roster.length !== 5) {
+                 .map(div => availablePlayerPool.find(p=>p.id==div.dataset.id));
+  if(roster.length !== 5){
     alert("Select exactly 5 players.");
     return;
   }
 
-  // Base statistics
-  let skill = 0;
-  let coh = 0;
-  let risk = 0;
+  let skill = 0, coh = 0, risk = 0;
 
-  // Add raw player skill + cohesion
-  roster.forEach(p => {
+  roster.forEach(p=>{
     skill += p.mech + p.iq;
     coh += p.comm + p.team;
   });
 
-  // Normalize skill + cohesion (keep the original behavior)
-  skill = Math.round(skill / 10);
-  coh = Math.round(coh / 10);
+  skill = Math.round(skill/10);
+  coh = Math.round(coh/10);
 
-  /* -------------------------------------------------------------
-     NEW RISK FORMULA — REALISTIC ESPORTS WELLNESS MODEL
-  ------------------------------------------------------------- */
-
-  // Reset risk for new formula
+  // --- New risk model ---
   risk = 0;
-
-  roster.forEach(p => {
-    // Toxicity matters most
+  roster.forEach(p=>{
+    const pers = (p.personality || "").toLowerCase();
     risk += p.toxic * 1.4;
-
-    // Low commitment increases instability
     risk += (100 - p.commit) * 0.4;
 
-    // Personality risk factors
-    if (
-      p.personality.includes("chaotic") ||
-      p.personality.includes("volatile") ||
-      p.personality.includes("ego") ||
-      p.personality.includes("emotional")
-    ) {
+    if (pers.includes("chaotic") || pers.includes("volatile") ||
+        pers.includes("ego") || pers.includes("emotional")) {
       risk += 15;
     }
-
-    // Personality stability
-    if (
-      p.personality.includes("calm") ||
-      p.personality.includes("selfless") ||
-      p.personality.includes("protective") ||
-      p.personality.includes("supportive") ||
-      p.personality.includes("empathetic")
-    ) {
+    if (pers.includes("calm") || pers.includes("selfless") ||
+        pers.includes("protective") || pers.includes("supportive") ||
+        pers.includes("empathetic")) {
       risk -= 10;
     }
   });
 
-  /* -------------------------------------------------------------
-     TRAINING-RELATED RISK
-  ------------------------------------------------------------- */
-
   const hours = parseInt(document.getElementById("hours").value);
   const intensity = document.getElementById("preIntensity").value;
 
-  // Overtraining = risk
   if (hours >= 9) risk += 20;
   else if (hours >= 7) risk += 10;
-
-  // Undertraining = frustration
   if (hours <= 3) risk += 5;
 
-  // Preseason intensity
   if (intensity === "high") risk += 15;
   if (intensity === "low") risk -= 7;
 
-  // Culture training reduces risk
   if (document.getElementById("tf_culture").checked) risk -= 12;
 
-  /* -------------------------------------------------------------
-     STAFF EFFECTS
-  ------------------------------------------------------------- */
-
-  document.querySelectorAll(".staffOpt.selected").forEach(btn => {
+  document.querySelectorAll(".staffOpt.selected").forEach(btn=>{
     const staffName = btn.textContent.toLowerCase();
-
     if (staffName.includes("psychologist")) risk -= 18;
     if (staffName.includes("wellness")) risk -= 12;
     if (staffName.includes("nutritionist")) risk -= 6;
     if (staffName.includes("life coach")) risk -= 15;
-
-    // Scouts increase pressure
     if (staffName.includes("talent scout")) risk += 8;
   });
 
-  /* -------------------------------------------------------------
-     ROLE BALANCE RISK
-  ------------------------------------------------------------- */
+  const roles = roster.map(p=>p.role);
+  const dps = roles.filter(r=>r==="DPS").length;
+  const tank = roles.filter(r=>r==="Tank").length;
+  const supp = roles.filter(r=>r==="Support").length;
 
-  const roles = roster.map(p => p.role);
-  const dps = roles.filter(r => r === "DPS").length;
-  const tank = roles.filter(r => r === "Tank").length;
-  const supp = roles.filter(r => r === "Support").length;
+  if (supp === 0) risk += 40;
+  if (dps >= 3) risk += 15;
+  if (tank >= 3) risk += 10;
 
-  if (supp === 0) risk += 40; // no supports = disaster
-  if (dps >= 3) risk += 15;   // ego clashes
-  if (tank >= 3) risk += 10;  // low flexibility
+  risk = Math.round(risk * 0.9);
+  risk = Math.max(0, risk);
 
-  /* -------------------------------------------------------------
-     FINAL NORMALIZATION
-  ------------------------------------------------------------- */
-
-  risk = Math.round(risk * 0.9); // soften spikes
-  risk = Math.max(0, risk);      // clamp flooring
-
-  // Write to UI
-  document.getElementById("m_risk").textContent = risk;
-
-  /* -------------------------------------------------------------
-     SKILL + COHESION STAFF/TRAINING EFFECTS (UNCHANGED)
-  ------------------------------------------------------------- */
-
-  // Training boosts
-  if (document.getElementById("tf_mech").checked) skill += 5;
-  if (document.getElementById("tf_strat").checked) skill += 4;
-
-  // Staff bonuses already handled skill & coh earlier, so:
-  document.querySelectorAll(".staffOpt.selected").forEach(btn => {
+  // Training boosts to skill/coh
+  if(document.getElementById("tf_mech").checked) skill += 5;
+  if(document.getElementById("tf_strat").checked) skill += 4;
+  document.querySelectorAll(".staffOpt.selected").forEach(btn=>{
     skill += parseInt(btn.dataset.skill);
     coh += parseInt(btn.dataset.cohesion);
   });
 
-  // Clamp skill/cohesion
-  skill = Math.min(200, Math.max(0, skill));
-  coh = Math.min(200, Math.max(0, coh));
+  skill = Math.min(200,Math.max(0,skill));
+  coh = Math.min(200,Math.max(0,coh));
 
   document.getElementById("m_skill").textContent = skill;
   document.getElementById("m_cohesion").textContent = coh;
-
-  /* -------------------------------------------------------------
-     FINAL OUTCOME TIER
-  ------------------------------------------------------------- */
+  document.getElementById("m_risk").textContent = risk;
 
   let tier = "Average Season";
-
-  if (skill > 140 && coh > 120 && risk < 20)
-    tier = "Championship Contender";
-  else if (skill > 120 && coh > 100)
-    tier = "Strong Competitive Season";
-  else if (skill < 90 || coh < 90)
-    tier = "Struggling Season";
+  if (skill > 140 && coh > 120 && risk < 20) tier = "Championship Contender";
+  else if (skill > 120 && coh > 100) tier = "Strong Competitive Season";
+  else if (skill < 90 || coh < 90) tier = "Struggling Season";
 
   document.getElementById("outcomeSummary").textContent =
     `Season Outcome: ${tier}\nSkill: ${skill}\nCohesion: ${coh}\nRisk: ${risk}`;
 }
-document.getElementById("outcomeSummary").textContent =
-    `Season Outcome: ${tier}\nSkill: ${skill}\nCohesion: ${coh}\nRisk: ${risk}`;
 
-document.querySelector('.step5').scrollIntoView({behavior:'smooth'});
-
-
-/* ============================================================
-   REFLECTION
-============================================================ */
+/* ---------- Reflection ---------- */
 function generateReflection(){
   const r1=document.getElementById("ref1").value;
   const r2=document.getElementById("ref2").value;
   const r3=document.getElementById("ref3").value;
   const r4=document.getElementById("ref4").value;
-
   document.getElementById("reflectionOut").textContent =
-`SEASON REFLECTION
-
-1. Recruitment Alignment:
+`COACH REFLECTION
+=================
+1. Recruitment Focus Alignment:
 ${r1}
 
-2. Training & Staff Impact:
+2. Impact of Training & Staff:
 ${r2}
 
-3. Next Season Adjustments:
+3. Adjustments for Next Season:
 ${r3}
 
-4. Connection to Real Coaching:
-${r4}`;
+4. Real Coaching Connections:
+${r4}
+`;
 }
 </script>
 
