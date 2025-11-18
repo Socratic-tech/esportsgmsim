@@ -419,31 +419,46 @@
         <span class="count-tag" id="recCountTag">0 / 3 selected</span>
       </h3>
       <div class="option-grid">
-        <div class="option-btn recOpt" data-label="Social media campaign (Instagram, TikTok, Discord)">
+        <!-- data-skill / data-cohesion / data-risk effects added -->
+        <div class="option-btn recOpt"
+             data-label="Social media campaign (Instagram, TikTok, Discord)"
+             data-skill="2" data-cohesion="0" data-risk="2">
           <span class="bullet">+</span>
           <div>Social media campaign (Instagram, TikTok, Discord)</div>
         </div>
-        <div class="option-btn recOpt" data-label="School announcements and hallway posters">
+        <div class="option-btn recOpt"
+             data-label="School announcements and hallway posters"
+             data-skill="1" data-cohesion="1" data-risk="0">
           <span class="bullet">+</span>
           <div>School announcements and hallway posters</div>
         </div>
-        <div class="option-btn recOpt" data-label="In-house tryout tournament">
+        <div class="option-btn recOpt"
+             data-label="In-house tryout tournament"
+             data-skill="3" data-cohesion="2" data-risk="1">
           <span class="bullet">+</span>
           <div>In-house tryout tournament</div>
         </div>
-        <div class="option-btn recOpt" data-label="Counselor & teacher referrals based on grades and behavior">
+        <div class="option-btn recOpt"
+             data-label="Counselor & teacher referrals based on grades and behavior"
+             data-skill="1" data-cohesion="3" data-risk="-2">
           <span class="bullet">+</span>
           <div>Counselor & teacher referrals based on grades and behavior</div>
         </div>
-        <div class="option-btn recOpt" data-label="Open esports lab / drop-in play sessions">
+        <div class="option-btn recOpt"
+             data-label="Open esports lab / drop-in play sessions"
+             data-skill="0" data-cohesion="2" data-risk="0">
           <span class="bullet">+</span>
           <div>Open esports lab / drop-in play sessions</div>
         </div>
-        <div class="option-btn recOpt" data-label="Collaboration with clubs (STEM, robotics, media, band, etc.)">
+        <div class="option-btn recOpt"
+             data-label="Collaboration with other clubs (STEM, robotics, media, band, etc.)"
+             data-skill="0" data-cohesion="3" data-risk="-1">
           <span class="bullet">+</span>
           <div>Collaboration with other clubs (STEM, robotics, media, band, etc.)</div>
         </div>
-        <div class="option-btn recOpt" data-label="Joint events with nearby schools or community centers">
+        <div class="option-btn recOpt"
+             data-label="Joint events with nearby schools or community centers"
+             data-skill="2" data-cohesion="1" data-risk="1">
           <span class="bullet">+</span>
           <div>Joint events with nearby schools or community centers</div>
         </div>
@@ -458,27 +473,39 @@
         <span class="count-tag" id="incCountTag">0 / 3 selected</span>
       </h3>
       <div class="option-grid">
-        <div class="option-btn incOpt" data-label="Custom team jerseys and branding">
+        <div class="option-btn incOpt"
+             data-label="Custom team jerseys and branding"
+             data-skill="0" data-cohesion="3" data-risk="0">
           <span class="bullet">+</span>
           <div>Custom team jerseys and branding</div>
         </div>
-        <div class="option-btn incOpt" data-label="Access to dedicated practice space and gaming equipment">
+        <div class="option-btn incOpt"
+             data-label="Access to dedicated practice space and gaming equipment"
+             data-skill="2" data-cohesion="1" data-risk="-1">
           <span class="bullet">+</span>
           <div>Access to dedicated practice space and gaming equipment</div>
         </div>
-        <div class="option-btn incOpt" data-label="Academic support and grade monitoring for eligibility">
+        <div class="option-btn incOpt"
+             data-label="Academic support and grade monitoring for eligibility"
+             data-skill="0" data-cohesion="2" data-risk="-4">
           <span class="bullet">+</span>
           <div>Academic support and grade monitoring for eligibility</div>
         </div>
-        <div class="option-btn incOpt" data-label="Leadership roles (captain, shot-caller, analyst, content lead)">
+        <div class="option-btn incOpt"
+             data-label="Leadership roles (captain, shot-caller, analyst, content lead)"
+             data-skill="1" data-cohesion="2" data-risk="0">
           <span class="bullet">+</span>
           <div>Leadership roles (captain, shot-caller, analyst, content lead)</div>
         </div>
-        <div class="option-btn incOpt" data-label="Travel opportunities for tournaments or scrims">
+        <div class="option-btn incOpt"
+             data-label="Travel opportunities for tournaments or scrims"
+             data-skill="3" data-cohesion="1" data-risk="3">
           <span class="bullet">+</span>
           <div>Travel opportunities for tournaments or scrims</div>
         </div>
-        <div class="option-btn incOpt" data-label="Support for highlight reels and streaming content">
+        <div class="option-btn incOpt"
+             data-label="Support for highlight reels and streaming content"
+             data-skill="1" data-cohesion="0" data-risk="1">
           <span class="bullet">+</span>
           <div>Support for highlight reels and streaming content</div>
         </div>
@@ -958,11 +985,35 @@ function runSimulation(){
     staffRisk += parseFloat(b.dataset.risk || "0");
   });
 
+  // recruitment activity modifiers
+  let recSkill = 0, recCoh = 0, recRisk = 0;
+  document.querySelectorAll(".recOpt.selected").forEach(b=>{
+    recSkill += parseFloat(b.dataset.skill || "0");
+    recCoh += parseFloat(b.dataset.cohesion || "0");
+    recRisk += parseFloat(b.dataset.risk || "0");
+  });
+
+  // incentive modifiers
+  let incSkill = 0, incCoh = 0, incRisk = 0;
+  document.querySelectorAll(".incOpt.selected").forEach(b=>{
+    incSkill += parseFloat(b.dataset.skill || "0");
+    incCoh += parseFloat(b.dataset.cohesion || "0");
+    incRisk += parseFloat(b.dataset.risk || "0");
+  });
+
+  // apply modifiers
   skill += staffSkill*0.3;
   cohesion += staffCoh*0.4;
 
+  skill += recSkill;
+  cohesion += recCoh;
+  skill += incSkill;
+  cohesion += incCoh;
+
   let risk = avgToxic*0.5 + (100-avgCommit)*0.3 + fatigue*2;
   risk += staffRisk;
+  risk += recRisk;
+  risk += incRisk;
 
   cohesion -= avgToxic*0.15;
   cohesion = clamp(cohesion,0,100);
