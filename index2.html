@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Esports Recruitment & Season Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+/* ---------- GLOBAL COLORS ---------- */
+:root{
+  --bg:#070b16;
+  --panel:#11172b;
+  --line:#1f2a52;
+  --text:#e8eeff;
+  --muted:#b9c8ff;
+  --accent:#6aa8ff;
+  --good:#10b981;
+  --bad:#ef4444;
+  --warn:#f59e0b;
+}
+
+/* Reset + base */
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#192247,#070b16 60%);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  overflow-x:hidden;
+}
+
+/* ---------- CINEMATIC INTRO OVERLAY ---------- */
+.intro-overlay{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:99999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  animation:fadeIn 0.5s ease-out;
+}
+
+/* animated bg */
+.intro-bg{
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 30% 30%,#202f69,#070b16 70%);
+  filter:blur(4px);
+  animation:bgPulse 12s infinite alternate ease-in-out;
+}
+
+/* glowing floaters */
+.glow{
+  position:absolute;
+  border-radius:50%;
+  opacity:.4;
+  filter:blur(70px);
+  animation:drift 13s infinite alternate ease-in-out;
+}
+.glow1{width:420px;height:420px;background:#6aa8ff;top:10%;left:15%;}
+.glow2{width:340px;height:340px;background:#a78bfa;bottom:12%;right:15%;animation-delay:3s;}
+.glow3{width:300px;height:300px;background:#4ade80;top:60%;left:55%;animation-delay:6s;}
+
+@keyframes drift{
+  from{transform:translate(-18px,-18px);}
+  to{transform:translate(18px,18px);}
+}
+@keyframes bgPulse{
+  from{transform:scale(1);}
+  to{transform:scale(1.05);}
+}
+
+/* panel */
+.intro-panel{
+  position:relative;
+  z-index:10;
+  width:90%;
+  max-width:700px;
+  padding:40px;
+  background:rgba(17,23,43,.85);
+  border:1px solid var(--line);
+  border-radius:18px;
+  backdrop-filter:blur(12px);
+  animation:panelPop .6s ease-out;
+}
+@keyframes panelPop{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* init log */
+.init-seq{
+  font-family:Consolas,monospace;
+  color:#9bb4ff;
+  font-size:.9rem;
+  margin-bottom:28px;
+  line-height:1.45;
+}
+.init-seq .seq-line{opacity:0;}
+.init-seq .final{color:#4ade80;font-weight:700;}
+
+/* intro main */
+.intro-main{
+  opacity:0;
+  transform:translateY(6px);
+  transition:opacity .6s ease,transform .6s ease;
+}
+.intro-main h1{
+  color:var(--accent);
+  font-size:2rem;
+  margin:0 0 10px;
+}
+.intro-main p{
+  color:var(--text);
+  font-size:1rem;
+  line-height:1.6;
+}
+
+/* intro buttons */
+.intro-controls{
+  margin-top:30px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+}
+#beginBtn{
+  padding:12px 26px;
+  border-radius:999px;
+  border:none;
+  background:var(--accent);
+  color:#050815;
+  cursor:pointer;
+  font-size:1rem;
+  font-weight:700;
+  box-shadow:0 0 14px rgba(106,168,255,.4);
+  transition:transform .2s ease, box-shadow .2s ease;
+}
+#beginBtn:hover{
+  transform:scale(1.07);
+  box-shadow:0 0 20px rgba(106,168,255,.7);
+}
+.audio-btn{
+  padding:8px 18px;
+  font-size:.9rem;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.08);
+  color:#9bb4ff;
+  cursor:pointer;
+}
+.audio-btn:hover{
+  background:rgba(255,255,255,.12);
+}
+
+/* hide overlay */
+.fade-out{
+  animation:fadeOut .7s ease-out forwards;
+}
+@keyframes fadeOut{
+  to{opacity:0;pointer-events:none;}
+}
+@keyframes fadeIn{
+  from{opacity:0;}
+  to{opacity:1;}
+}
+
+/* ---------- MAIN SIMULATOR LAYOUT ---------- */
+
+.top-bar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  background:rgba(7,11,22,.92);
+  backdrop-filter:blur(8px);
+  padding:10px 0 12px;
+  border-bottom:1px solid var(--line);
+}
+.progress-track{
+  height:6px;
+  background:#1c2440;
+  border-radius:999px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  width:0%;
+  border-radius:999px;
+  background:linear-gradient(90deg,#6aa8ff,#b5c8ff);
+  transition:width .4s ease;
+}
+.step-labels{
+  margin-top:6px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  font-size:.75rem;
+}
+.step-chip{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:3px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  color:var(--muted);
+  opacity:.5;
+}
+.step-chip.active{
+  border-color:var(--accent);
+  color:var(--accent);
+  opacity:1;
+}
+.step-chip.completed{
+  opacity:.9;
+}
+
+/* bottom nav */
+.nav-bar{
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:rgba(7,11,22,.96);
+  backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  padding:8px 0;
+}
+.nav-inner{
+  max-width:1100px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+}
+.btn-secondary{
+  background:transparent;
+  color:var(--muted);
+  border:1px solid var(--line);
+  border-radius:999px;
+  padding:10px 18px;
+  cursor:pointer;
+}
+#nextBtn, #prevBtn{
+  padding:10px 18px;
+  border-radius:999px;
+}
+
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:16px 16px 80px;
+}
+
+.panel{
+  background:var(--panel);
+  border-radius:16px;
+  padding:20px;
+  border:1px solid var(--line);
+  margin-bottom:18px;
+}
+
+label{font-weight:600;margin-top:8px;display:block;}
+textarea,input,select{
+  width:100%;
+  padding:8px 10px;
+  border-radius:8px;
+  border:1px solid #2b355c;
+  background:#050815;
+  color:var(--text);
+}
+textarea{min-height:70px;resize:vertical;}
+
+.row{display:flex;flex-wrap:wrap;gap:12px;}
+.col{flex:1 1 240px;}
+
+.option-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.option-btn{
+  flex:1 1 220px;
+  border-radius:12px;
+  padding:8px 10px;
+  background:#050815;
+  border:1px solid #2b355c;
+  color:#9bb4ff;
+  cursor:pointer;
+  display:flex;
+  gap:8px;
+  transition:all .2s ease-out;
+}
+.option-btn.selected{
+  background:rgba(106,168,255,.15);
+  border-color:var(--accent);
+  color:var(--accent);
+  box-shadow:0 0 0 1px rgba(106,168,255,.3);
+}
+.option-btn .bullet{
+  width:18px;height:18px;
+  border:1px solid #2b355c;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.75rem;
+}
+
+/* players */
+.player-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:10px;
+}
+.player-card{
+  padding:10px;
+  border-radius:12px;
+  border:1px solid #2b355c;
+  background:#050815;
+  cursor:pointer;
+}
+.player-card.selected{
+  border-color:var(--accent);
+  background:rgba(106,168,255,.15);
+}
+
+/* metrics */
+.metric{
+  background:#050815;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  flex:1 1 160px;
+}
+.metric h4{
+  font-size:.9rem;
+  margin:0 0 4px;
+  color:var(--muted);
+}
+.metric span{font-size:1.2rem;font-weight:700;}
+
+.output-block{
+  background:#050815;
+  border-radius:12px;
+  border:1px solid var(--line);
+  padding:12px;
+  white-space:pre-wrap;
+  margin-top:8px;
+}
+.flyer{
+  margin-top:10px;
+  padding:16px;
+  border-radius:14px;
+  background:#f7f7ff;
+  color:#111829;
+}
+
+/* step transitions */
+.step{display:none;opacity:0;transform:translateY(6px);transition:.3s;}
+.step.active{display:block;opacity:1;transform:translateY(0);}
+
+</style>
+</head>
+
+<body>
+
+<!-- ============================
+      CINEMATIC INTRO OVERLAY
+============================ -->
+<div id="introOverlay" class="intro-overlay">
+  <div class="intro-bg"></div>
+  <div class="glow glow1"></div>
+  <div class="glow glow2"></div>
+  <div class="glow glow3"></div>
+
+  <div class="intro-panel">
+    <div class="init-seq" id="initSeq">
+      <span>Initializing coaching interface…</span><br>
+      <span class="seq-line">Loading player analytics…</span><br>
+      <span class="seq-line">Assessing recruitment pipelines…</span><br>
+      <span class="seq-line">Syncing performance metrics…</span><br>
+      <span class="seq-line">Preparing season dashboard…</span><br>
+      <span class="seq-line final">Ready.</span><br>
+    </div>
+
+    <div class="intro-main" id="introMain">
+      <h1>Welcome, Coach.</h1>
+      <p>You’re stepping into the role of Head Coach for a brand-new esports program.<br>
+      Your mission: build a competitive roster that performs, grows, and thrives—without burning out.</p>
+      <p>Your decisions shape who applies, who joins the team, how well they train, and how your season ends.</p>
+
+      <div class="intro-controls">
+        <button id="beginBtn">Start Your Season</button>
+        <button id="toggleAudio" class="audio-btn">🔊 Enable Ambient Sound</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     TOP BAR + PROGRESS
+============================================================= -->
+<div class="top-bar">
+  <div class="container" style="padding-bottom:0;">
+    <div class="progress-track">
+      <div id="progressFill" class="progress-fill"></div>
+    </div>
+    <div class="step-labels">
+      <div class="step-chip" data-step-label="1"><span>1</span>Recruitment</div>
+      <div class="step-chip" data-step-label="2"><span>2</span>Training</div>
+      <div class="step-chip" data-step-label="3"><span>3</span>Staff</div>
+      <div class="step-chip" data-step-label="4"><span>4</span>Roster</div>
+      <div class="step-chip" data-step-label="5"><span>5</span>Simulate</div>
+      <div class="step-chip" data-step-label="6"><span>6</span>Reflection</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     MAIN CONTENT CONTAINER
+============================================================= -->
+<div class="container">
+
+<h1>Esports Season Builder Simulator</h1>
+<p style="color:var(--muted);">Move step-by-step to construct your recruitment plan, training framework, staff team, roster, and final season outcome.</p>
+
+<!-- ============================================================
+     STEP 1 — Recruitment
+============================================================= -->
+<div class="step active" data-step="1">
+  <div class="panel">
+    <h2>1️⃣ Recruitment Plan</h2>
+    <div class="row">
+      <div class="col">
+        <label for="teamName">Team / Program Name</label>
+        <input id="teamName" placeholder="Example: Lakeside Legends"/>
+      </div>
+      <div class="col">
+        <label for="focus">Recruitment Focus</label>
+        <select id="focus">
+          <option value="balanced">Balanced</option>
+          <option value="mechanics">Raw Mechanics</option>
+          <option value="iq">Game Sense / IQ</option>
+          <option value="culture">Communication & Culture</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Target Group</label>
+    <textarea id="targetGroup" placeholder="Ex: Motivated students with good behavior and baseline game knowledge."></textarea>
+
+    <h3>Recruitment Activities <span id="recCountTag" class="count-tag">0 / 3 selected</span></h3>
+    <div class="option-grid">
+      <div class="option-btn recOpt" data-label="Social media campaign" data-skill="2" data-cohesion="0" data-risk="2">
+        <div class="bullet">+</div>Social media campaign
+      </div>
+      <div class="option-btn recOpt" data-label="School announcements" data-skill="1" data-cohesion="1" data-risk="0">
+        <div class="bullet">+</div>School announcements
+      </div>
+      <div class="option-btn recOpt" data-label="In-house tryout tournament" data-skill="3" data-cohesion="2" data-risk="1">
+        <div class="bullet">+</div>In-house tryout tournament
+      </div>
+      <div class="option-btn recOpt" data-label="Counselor referrals" data-skill="1" data-cohesion="3" data-risk="-2">
+        <div class="bullet">+</div>Counselor referrals
+      </div>
+      <div class="option-btn recOpt" data-label="Open lab sessions" data-skill="0" data-cohesion="2" data-risk="0">
+        <div class="bullet">+</div>Open lab sessions
+      </div>
+      <div class="option-btn recOpt" data-label="Collaboration with other clubs" data-skill="0" data-cohesion="3" data-risk="-1">
+        <div class="bullet">+</div>Collaboration with clubs
+      </div>
+      <div class="option-btn recOpt" data-label="Joint community events" data-skill="2" data-cohesion="1" data-risk="1">
+        <div class="bullet">+</div>Joint community events
+      </div>
+    </div>
+
+    <label for="strategiesOther">Additional Recruitment Methods (optional)</label>
+    <textarea id="strategiesOther"></textarea>
+
+    <h3>Incentives & Benefits <span id="incCountTag" class="count-tag">0 / 3</span></h3>
+    <div class="option-grid">
+      <div class="option-btn incOpt" data-label="Team jerseys" data-skill="0" data-cohesion="3" data-risk="0">
+        <div class="bullet">+</div>Team jerseys
+      </div>
+      <div class="option-btn incOpt" data-label="Dedicated practice space" data-skill="2" data-cohesion="1" data-risk="-1">
+        <div class="bullet">+</div>Practice space
+      </div>
+      <div class="option-btn incOpt" data-label="Academic support" data-skill="0" data-cohesion="2" data-risk="-4">
+        <div class="bullet">+</div>Academic support
+      </div>
+      <div class="option-btn incOpt" data-label="Leadership roles" data-skill="1" data-cohesion="2" data-risk="0">
+        <div class="bullet">+</div>Leadership roles
+      </div>
+      <div class="option-btn incOpt" data-label="Travel opportunities" data-skill="3" data-cohesion="1" data-risk="3">
+        <div class="bullet">+</div>Travel opportunities
+      </div>
+      <div class="option-btn incOpt" data-label="Content/stream support" data-skill="1" data-cohesion="0" data-risk="1">
+        <div class="bullet">+</div>Content support
+      </div>
+    </div>
+
+    <label for="incentivesOther">Other Incentives (optional)</label>
+    <textarea id="incentivesOther"></textarea>
+
+    <button type="button" onclick="generatePlan()">Generate Written Plan & Flyer</button>
+    <div id="recruitmentPlanOut" class="output-block"></div>
+
+    <h3>Recruitment Flyer Preview</h3>
+    <div id="flyer" class="flyer"></div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 2 — Training
+============================================================= -->
+<div class="step" data-step="2">
+  <div class="panel">
+    <h2>2️⃣ Training Framework</h2>
+    <div class="row">
+      <div class="col">
+        <label for="preIntensity">Pre-season Intensity</label>
+        <select id="preIntensity">
+          <option value="low">Low</option>
+          <option value="medium" selected>Medium</option>
+          <option value="high">High</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="hours">Weekly Training Hours</label>
+        <input id="hours" type="number" value="6" min="1" max="20">
+      </div>
+    </div>
+
+    <label>Season Training Focus</label>
+    <div>
+      <label><input type="checkbox" id="tf_mech" checked> Mechanics</label><br>
+      <label><input type="checkbox" id="tf_strat" checked> Strategy/VOD review</label><br>
+      <label><input type="checkbox" id="tf_culture" checked> Team culture & wellness</label>
+    </div>
+
+    <label for="preseason">Pre-season Activities</label>
+    <textarea id="preseason"></textarea>
+
+    <label for="season">Season Schedule</label>
+    <textarea id="season"></textarea>
+
+    <label for="monitor">Progress Monitoring</label>
+    <textarea id="monitor"></textarea>
+
+    <button type="button" onclick="generateTraining()">Generate Training Framework</button>
+    <div id="trainingOut" class="output-block"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 3 — Staff
+============================================================= -->
+<div class="step" data-step="3">
+  <div class="panel">
+    <h2>3️⃣ Staff & Support Team</h2>
+    <p style="color:var(--muted);">Head Coach is included automatically. Choose up to 4 more staff roles.</p>
+
+    <h3>Staff Roles <span id="staffCountTag" class="count-tag">0 / 4</span></h3>
+    <div class="option-grid">
+      <div class="option-btn staffOpt" data-label="Analyst Coach" data-skill="5" data-cohesion="1" data-risk="-1">
+        <div class="bullet">+</div>Analyst Coach
+      </div>
+      <div class="option-btn staffOpt" data-label="Position Coach" data-skill="4" data-cohesion="1" data-risk="0">
+        <div class="bullet">+</div>Position Coach
+      </div>
+      <div class="option-btn staffOpt" data-label="Performance Scout" data-skill="3" data-cohesion="0" data-risk="0">
+        <div class="bullet">+</div>Performance Scout
+      </div>
+      <div class="option-btn staffOpt" data-label="Life Coach / Psych" data-skill="1" data-cohesion="5" data-risk="-6">
+        <div class="bullet">+</div>Life Coach / Psych
+      </div>
+      <div class="option-btn staffOpt" data-label="Athletic Trainer" data-skill="0" data-cohesion="2" data-risk="-5">
+        <div class="bullet">+</div>Athletic Trainer
+      </div>
+      <div class="option-btn staffOpt" data-label="Fitness Coach" data-skill="1" data-cohesion="2" data-risk="-3">
+        <div class="bullet">+</div>Fitness Coach
+      </div>
+      <div class="option-btn staffOpt" data-label="Nutritionist" data-skill="0" data-cohesion="1" data-risk="-4">
+        <div class="bullet">+</div>Nutritionist
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 4 — Roster
+============================================================= -->
+<div class="step" data-step="4">
+  <div class="panel">
+    <h2>4️⃣ Player Pool & Roster Selection</h2>
+    <p style="color:var(--muted);">Your earlier choices determine which 8 players show up. Select **exactly 5**.</p>
+
+    <h3>Roster <span id="playerCountTag" class="count-tag">0 / 5</span></h3>
+    <p id="poolSummary" class="small-note"></p>
+    <div id="playerGrid" class="player-grid"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 5 — Simulation
+============================================================= -->
+<div class="step" data-step="5">
+  <div class="panel">
+    <h2>5️⃣ Season Simulation</h2>
+
+    <button onclick="runSimulation()">Simulate Season</button>
+
+    <div class="flex" style="margin-top:16px;display:flex;flex-wrap:wrap;gap:12px;">
+      <div class="metric"><h4>Skill</h4><span id="m_skill">–</span></div>
+      <div class="metric"><h4>Cohesion</h4><span id="m_cohesion">–</span></div>
+      <div class="metric"><h4>Risk</h4><span id="m_risk">–</span></div>
+    </div>
+
+    <h3>Season Outcome</h3>
+    <div id="outcomeSummary" class="output-block"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     STEP 6 — Reflection
+============================================================= -->
+<div class="step" data-step="6">
+  <div class="panel">
+    <h2>6️⃣ Reflection</h2>
+
+    <label>1. How did your recruitment choices align with your focus?</label>
+    <textarea id="ref1"></textarea>
+
+    <label>2. How did training & staff decisions affect the outcome?</label>
+    <textarea id="ref2"></textarea>
+
+    <label>3. What changes would you make next season?</label>
+    <textarea id="ref3"></textarea>
+
+    <label>4. Connections to real esports coaching:</label>
+    <textarea id="ref4"></textarea>
+
+    <button onclick="generateReflection()">Generate Reflection</button>
+    <div id="reflectionOut" class="output-block"></div>
+  </div>
+</div>
+
+</div> <!-- end .container -->
+
+
+<!-- ============================================================
+     BOTTOM NAVIGATION
+============================================================= -->
+<div class="nav-bar">
+  <div class="nav-inner">
+    <div id="stepCounter" class="step-counter">Step 1 of 6 · Recruitment</div>
+    <div class="nav-buttons">
+      <button id="prevBtn" class="btn-secondary" onclick="changeStep(-1)" disabled>Back</button>
+      <button id="nextBtn" onclick="changeStep(1)">Next</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     JAVASCRIPT (continues in next message)
+============================================================= -->
+<script>
+/* Because of size limits, JS continues in PART 2 */
+/* ============================================================
+   FULL JAVASCRIPT LOGIC
+   (Roster, Player Pool, Recruitment, Training, Staff, Simulation)
+============================================================ */
+
+/* ------------------ INTRO SEQUENCE ------------------ */
+
+const initSeqLines = document.querySelectorAll(".seq-line");
+const introMain = document.getElementById("introMain");
+const introOverlay = document.getElementById("introOverlay");
+
+// Electronic ambient track (non-autoplay)
+let introAudio = new Audio();
+introAudio.src = "https://cdn.pixabay.com/download/audio/2022/03/03/audio_25aa8d8f93.mp3?filename=cyberpunk-ambient-110386.mp3";
+introAudio.loop = true;
+introAudio.volume = 0.4;
+
+document.getElementById("toggleAudio").addEventListener("click", () => {
+  if (introAudio.paused) {
+    introAudio.play();
+    document.getElementById("toggleAudio").textContent = "🔇 Disable Ambient Sound";
+  } else {
+    introAudio.pause();
+    document.getElementById("toggleAudio").textContent = "🔊 Enable Ambient Sound";
+  }
+});
+
+function runInitSequence() {
+  let delay = 600;
+  initSeqLines.forEach((line, i) => {
+    setTimeout(() => {
+      line.style.opacity = 1;
+    }, delay);
+    delay += 600;
+  });
+
+  setTimeout(() => {
+    introMain.style.opacity = 1;
+    introMain.style.transform = "translateY(0)";
+  }, delay + 400);
+}
+
+document.getElementById("beginBtn").addEventListener("click", () => {
+  introOverlay.classList.add("fade-out");
+  setTimeout(() => introOverlay.remove(), 750);
+});
+
+window.addEventListener("load", runInitSequence);
+
+
+/* ------------------ NAVIGATION ------------------ */
+
+let currentStep = 1;
+const totalSteps = 6;
+
+function changeStep(delta) {
+  const newStep = currentStep + delta;
+  if (newStep < 1 || newStep > totalSteps) return;
+
+  // Leaving step → entering step logic
+  currentStep = newStep;
+  updateStepUI();
+
+  // Build or refresh player pool when entering roster step
+  if (currentStep === 4) {
+    buildAvailablePlayerPool();
+    renderPlayerGrid();
+    summarizePool();
+  }
+}
+
+function updateStepUI() {
+  document.querySelectorAll(".step").forEach(step => step.classList.remove("active"));
+  document.querySelector(`.step[data-step="${currentStep}"]`).classList.add("active");
+
+  // Progress bar
+  const pct = (currentStep - 1) / (totalSteps - 1) * 100;
+  document.getElementById("progressFill").style.width = pct + "%";
+
+  // Step chips
+  document.querySelectorAll(".step-chip").forEach(chip => {
+    const stepNum = parseInt(chip.getAttribute("data-step-label"));
+    chip.classList.remove("active","completed");
+    if (stepNum < currentStep) chip.classList.add("completed");
+    if (stepNum === currentStep) chip.classList.add("active");
+  });
+
+  // Nav buttons
+  document.getElementById("prevBtn").disabled = currentStep === 1;
+  document.getElementById("nextBtn").disabled = currentStep === 6;
+
+  const labels = ["Recruitment","Training","Staff","Roster","Simulate","Reflection"];
+  document.getElementById("stepCounter").textContent =
+    `Step ${currentStep} of 6 · ${labels[currentStep-1]}`;
+}
+
+
+/* ------------------ OPTION BUTTON LOGIC ------------------ */
+
+function setupOptionButtons() {
+  document.querySelectorAll(".option-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const isSelected = btn.classList.contains("selected");
+      const group = btn.classList.contains("recOpt")
+        ? ".recOpt"
+        : btn.classList.contains("incOpt")
+        ? ".incOpt"
+        : btn.classList.contains("staffOpt")
+        ? ".staffOpt"
+        : null;
+
+      // Handle recruitment & incentives (3 max)
+      if (group === ".recOpt" || group === ".incOpt") {
+        const selected = document.querySelectorAll(group + ".selected").length;
+        if (!isSelected && selected >= 3) return;
+      }
+
+      // Handle staff (4 max)
+      if (group === ".staffOpt") {
+        const selected = document.querySelectorAll(".staffOpt.selected").length;
+        if (!isSelected && selected >= 4) return;
+      }
+
+      btn.classList.toggle("selected");
+      updateCounts();
+    });
+  });
+}
+
+setupOptionButtons();
+
+function updateCounts() {
+  document.getElementById("recCountTag").textContent =
+    `${document.querySelectorAll(".recOpt.selected").length} / 3`;
+
+  document.getElementById("incCountTag").textContent =
+    `${document.querySelectorAll(".incOpt.selected").length} / 3`;
+
+  document.getElementById("staffCountTag").textContent =
+    `${document.querySelectorAll(".staffOpt.selected").length} / 4`;
+
+  document.getElementById("playerCountTag").textContent =
+    `${document.querySelectorAll(".player-card.selected").length} / 5`;
+}
+
+
+/* ============================================================
+   PLAYER POOL
+============================================================ */
+
+const playerPool = [
+  {id:1,name:"Apex",role:"Flex",mech:92,iq:78,comm:70,team:65,commit:80,toxic:30},
+  {id:2,name:"Shadow",role:"DPS",mech:95,iq:72,comm:55,team:52,commit:70,toxic:60},
+  {id:3,name:"FrostByte",role:"Tank",mech:75,iq:88,comm:82,team:90,commit:85,toxic:12},
+  {id:4,name:"Nova",role:"Support",mech:68,iq:85,comm:88,team:92,commit:95,toxic:5},
+  {id:5,name:"Blitz",role:"DPS",mech:89,iq:70,comm:58,team:55,commit:82,toxic:40},
+  {id:6,name:"Circuit",role:"Flex",mech:78,iq:80,comm:84,team:76,commit:87,toxic:15},
+  {id:7,name:"Harpy",role:"Support",mech:70,iq:83,comm:85,team:88,commit:60,toxic:25},
+  {id:8,name:"Crank",role:"Tank",mech:65,iq:67,comm:50,team:52,commit:55,toxic:70},
+  {id:9,name:"Spectre",role:"DPS",mech:90,iq:90,comm:72,team:60,commit:75,toxic:20},
+  {id:10,name:"Atlas",role:"Tank",mech:82,iq:88,comm:79,team:85,commit:90,toxic:10},
+];
+
+let availablePlayerPool = [];
+
+
+/* ---------- BUILD POOL BASED ON RECRUITMENT ---------- */
+
+function buildAvailablePlayerPool() {
+  const focus = document.getElementById("focus").value;
+  const recButtons = document.querySelectorAll(".recOpt.selected");
+  const incButtons = document.querySelectorAll(".incOpt.selected");
+
+  availablePlayerPool = [];
+
+  playerPool.forEach(p => {
+    let interest = 50;
+
+    // Focus alignment
+    if (focus === "mechanics") interest += (p.mech - 80)/2;
+    if (focus === "iq") interest += (p.iq - 80)/2;
+    if (focus === "culture") {
+      interest += (p.comm - 75)/2 + (p.team - 75)/2;
+      interest -= (p.toxic - 25)/3;
+    }
+
+    // Recruitment activities
+    recButtons.forEach(b=>{
+      const lab = b.dataset.label;
+      if (lab.includes("Social media")) interest += (p.mech - 75)/4;
+      if (lab.includes("In-house")) interest += (p.mech - 70)/4 + (p.commit - 70)/4;
+      if (lab.includes("Counselor")) interest += (p.commit - 75)/4 - (p.toxic - 20)/4;
+      if (lab.includes("Open lab")) interest += (p.team - 70)/4 - (p.toxic - 20)/4;
+      if (lab.includes("Collaboration")) interest += (p.comm - 75)/4 + (p.team - 75)/4;
+      if (lab.includes("Joint")) interest += (p.mech - 70)/5 + (p.comm - 70)/5;
+    });
+
+    // Incentives
+    incButtons.forEach(b=>{
+      const lab = b.dataset.label;
+      if (lab.includes("Practice")) interest += (p.commit - 75)/4;
+      if (lab.includes("Travel")) interest += (p.mech - 80)/4 + 2;
+      if (lab.includes("Academic")) interest += (p.commit - 75)/3 - (p.toxic - 20)/3;
+      if (lab.includes("Leadership")) interest += (p.comm - 75)/4 + (p.iq - 75)/4;
+    });
+
+    // Noise
+    interest += (Math.random()-0.5)*4;
+
+    p._interest = interest;
+  });
+
+  const sorted = [...playerPool].sort((a,b)=>b._interest - a._interest);
+  availablePlayerPool = sorted.slice(0,8);
+}
+
+function summarizePool() {
+  const avgMech = Math.round(availablePlayerPool.reduce((a,b)=>a+b.mech,0)/availablePlayerPool.length);
+  const avgIQ = Math.round(availablePlayerPool.reduce((a,b)=>a+b.iq,0)/availablePlayerPool.length);
+  const avgComm = Math.round(availablePlayerPool.reduce((a,b)=>a+b.comm,0)/availablePlayerPool.length);
+  const avgTox = Math.round(availablePlayerPool.reduce((a,b)=>a+b.toxic,0)/availablePlayerPool.length);
+
+  document.getElementById("poolSummary").innerHTML =
+    `Your recruitment attracted players with roughly:<br>
+     <strong>Mech:</strong> ${avgMech} · 
+     <strong>IQ:</strong> ${avgIQ} · 
+     <strong>Comm:</strong> ${avgComm} · 
+     <strong>Toxicity:</strong> ${avgTox}`;
+}
+
+
+/* ---------- RENDER PLAYER GRID ---------- */
+
+function renderPlayerGrid() {
+  const grid = document.getElementById("playerGrid");
+  grid.innerHTML = "";
+
+  availablePlayerPool.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "player-card";
+    card.dataset.id = p.id;
+
+    card.innerHTML =
+      `<strong>${p.name}</strong><br>
+       Role: ${p.role}<br>
+       Mech: ${p.mech} | IQ: ${p.iq}<br>
+       Comm: ${p.comm} | Team: ${p.team}<br>
+       Commit: ${p.commit} | Toxic: ${p.toxic}`;
+
+    card.addEventListener("click", () => {
+      const selected = card.classList.contains("selected");
+      const count = document.querySelectorAll(".player-card.selected").length;
+      if (!selected && count >= 5) return;
+      card.classList.toggle("selected");
+      updateCounts();
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+
+/* ============================================================
+   GENERATE WRITTEN RECRUITMENT PLAN + FLYER
+============================================================ */
+function generatePlan() {
+  const name = document.getElementById("teamName").value || "Our Team";
+  const target = document.getElementById("targetGroup").value;
+  const recItems = [...document.querySelectorAll(".recOpt.selected")].map(b=>b.dataset.label);
+  const incItems = [...document.querySelectorAll(".incOpt.selected")].map(b=>b.dataset.label);
+
+  let txt =
+`ESPORTS RECRUITMENT PLAN
+========================
+Team Name:
+${name}
+
+Target Group:
+${target}
+
+Recruitment Activities:
+- ${recItems.join("\n- ")}
+
+Incentives & Benefits:
+- ${incItems.join("\n- ")}
+
+Additional Notes:
+${document.getElementById("strategiesOther").value}
+${document.getElementById("incentivesOther").value}
+
+Timeline:
+Week 1 – Launch campaign
+Week 2 – Interest meeting
+Week 3 – Tryouts
+Week 4 – Final roster
+`;
+
+  document.getElementById("recruitmentPlanOut").textContent = txt;
+
+  // Flyer
+  document.getElementById("flyer").innerHTML =
+    `<h2>${name} – We’re Recruiting!</h2>
+     <p><strong>Who We Want:</strong><br>${target}</p>
+     <p><strong>Why Join:</strong><br>${incItems.join(", ")}</p>
+     <p><strong>How to Apply:</strong><br>Attend tryouts or fill out our interest form.</p>`;
+}
+
+
+/* ============================================================
+   TRAINING FRAMEWORK
+============================================================ */
+function generateTraining() {
+  const preseason = document.getElementById("preseason").value;
+  const season = document.getElementById("season").value;
+  const monitor = document.getElementById("monitor").value;
+
+  const txt =
+`TRAINING FRAMEWORK
+===================
+Preseason Plan:
+${preseason}
+
+Season Schedule:
+${season}
+
+Progress Monitoring:
+${monitor}
+`;
+
+  document.getElementById("trainingOut").textContent = txt;
+}
+
+
+/* ============================================================
+   SIMULATION LOGIC
+============================================================ */
+function runSimulation() {
+  const roster =
+    [...document.querySelectorAll(".player-card.selected")]
+    .map(div => availablePlayerPool.find(p=>p.id==div.dataset.id));
+
+  if (roster.length !== 5) {
+    alert("Select exactly 5 players.");
+    return;
+  }
+
+  let skill = 0, cohesion = 0, risk = 0;
+
+  roster.forEach(p=>{
+    skill += p.mech + p.iq;
+    cohesion += p.comm + p.team;
+    risk += p.toxic - p.commit;
+  });
+
+  // normalize
+  skill = Math.round(skill / 10);
+  cohesion = Math.round(cohesion / 10);
+
+  // Training modifiers
+  const hours = parseInt(document.getElementById("hours").value);
+  const intensity = document.getElementById("preIntensity").value;
+
+  if (intensity === "high") { skill += 10; risk += 8; }
+  if (intensity === "low") { skill -= 5; cohesion += 5; }
+
+  if (hours > 8) risk += 6;
+  if (hours < 4) skill -= 5;
+
+  if (document.getElementById("tf_mech").checked) skill += 5;
+  if (document.getElementById("tf_strat").checked) skill += 4;
+  if (document.getElementById("tf_culture").checked) cohesion += 8;
+
+  // Staff modifiers
+  [...document.querySelectorAll(".staffOpt.selected")].forEach(btn=>{
+    skill += parseInt(btn.dataset.skill);
+    cohesion += parseInt(btn.dataset.cohesion);
+    risk += parseInt(btn.dataset.risk);
+  });
+
+  // Clamp
+  skill = Math.max(0, Math.min(skill, 200));
+  cohesion = Math.max(0, Math.min(cohesion, 200));
+
+  document.getElementById("m_skill").textContent = skill;
+  document.getElementById("m_cohesion").textContent = cohesion;
+  document.getElementById("m_risk").textContent = risk;
+
+  // Outcome
+  let tier = "Average Season";
+  if (skill > 140 && cohesion > 120 && risk < 20) tier = "Championship Contender";
+  else if (skill > 120 && cohesion > 100) tier = "Strong Competitive Season";
+  else if (skill < 90 || cohesion < 90) tier = "Struggling Season";
+
+  document.getElementById("outcomeSummary").textContent =
+    `Final Season Outcome: ${tier}\n\nSkill: ${skill}\nCohesion: ${cohesion}\nRisk: ${risk}`;
+}
+
+
+/* ============================================================
+   REFLECTION
+============================================================ */
+function generateReflection() {
+  const r1 = document.getElementById("ref1").value;
+  const r2 = document.getElementById("ref2").value;
+  const r3 = document.getElementById("ref3").value;
+  const r4 = document.getElementById("ref4").value;
+
+  const txt =
+`COACH REFLECTION
+=================
+1. Recruitment Focus Alignment:
+${r1}
+
+2. Impact of Training & Staff:
+${r2}
+
+3. Adjustments for Next Season:
+${r3}
+
+4. Real Coaching Connections:
+${r4}
+`;
+
+  document.getElementById("reflectionOut").textContent = txt;
+}
+
+</script>
+
+</body>
+</html>
