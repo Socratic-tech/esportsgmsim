@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Esports Athlete Recruitment & Team Outcome Simulator</title>
+<title>Esports Athlete Recruitment & Team Outcome Simulator v2</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root{
@@ -140,17 +140,6 @@
     font-size:1.1rem;
     font-weight:700;
   }
-  .badge{
-    display:inline-block;
-    padding:3px 8px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    font-size:0.75rem;
-    margin-left:6px;
-    color:var(--muted);
-  }
-  .badge.focus{border-color:var(--accent);color:var(--accent)}
-  .badge.risk{border-color:var(--bad);color:var(--bad)}
   .flyer{
     background:#f7f7ff;
     color:#111827;
@@ -171,6 +160,11 @@
     border-top:2px solid #e5e7eb;
     margin:8px 0 10px;
   }
+  .small-note{
+    font-size:0.8rem;
+    color:var(--muted);
+    margin-top:2px;
+  }
   @media(max-width:720px){
     .row{flex-direction:column}
   }
@@ -178,13 +172,13 @@
 </head>
 <body>
 <div class="container">
-  <h1>🎮 Esports Athlete Recruitment & Outcome Simulator</h1>
+  <h1>🎮 Esports Athlete Recruitment, Training & Outcome Simulator</h1>
   <p style="color:var(--muted);max-width:800px">
-    Design a recruitment & training plan, then apply it to a virtual player pool. 
-    Your choices will determine how your team performs over the season.
+    Design a recruitment & training plan, apply it to a virtual player pool (exactly 5 players),
+    simulate your season, and then complete a coach reflection.
   </p>
 
-  <!-- PLAN SETUP -->
+  <!-- 1. PLAN SETUP -->
   <div class="panel">
     <h2>1️⃣ Recruitment Plan</h2>
     <div class="row">
@@ -204,22 +198,53 @@
     </div>
 
     <label for="targetGroup">Target Group (who are you recruiting?)</label>
-    <textarea id="targetGroup" placeholder="Example: High school students with at least Gold rank in Rocket League and a 2.5+ GPA who are interested in structured team play."></textarea>
+    <textarea id="targetGroup" placeholder="Example: High school students with at least Gold rank and a 2.5+ GPA who want to play in a structured team."></textarea>
 
-    <label for="strategies">Recruitment Strategies</label>
-    <textarea id="strategies" placeholder="Example: Social media campaign, in-house tournament, lunchroom booth, collaboration with counseling office for academic-eligible students."></textarea>
+    <h3>Recruitment Activities (choose up to 3)</h3>
+    <div class="row">
+      <div class="col">
+        <label><input type="checkbox" class="recOpt" data-label="Social media campaign (Instagram, TikTok, Discord)"> Social media campaign</label><br/>
+        <label><input type="checkbox" class="recOpt" data-label="School announcements and hallway posters"> School announcements & posters</label><br/>
+        <label><input type="checkbox" class="recOpt" data-label="In-house tryout tournament"> In-house tryout tournament</label><br/>
+        <label><input type="checkbox" class="recOpt" data-label="Counselor & teacher referrals based on grades and behavior"> Counselor/teacher referrals</label>
+      </div>
+      <div class="col">
+        <label><input type="checkbox" class="recOpt" data-label="Open esports lab / drop-in play sessions"> Open lab / drop-in play</label><br/>
+        <label><input type="checkbox" class="recOpt" data-label="Collaboration with clubs (STEM, robotics, media, band, etc.)"> Collaboration with other clubs</label><br/>
+        <label><input type="checkbox" class="recOpt" data-label="Joint events with nearby schools or community centers"> Joint events with other schools</label>
+      </div>
+    </div>
+    <div class="small-note">You may select up to 3 recruitment activities.</div>
 
-    <label for="incentives">Incentives & Benefits</label>
-    <textarea id="incentives" placeholder="Example: Academic support, college esports info nights, jerseys, leadership roles, highlight reels."></textarea>
+    <label for="strategiesOther">Other recruitment ideas (optional)</label>
+    <textarea id="strategiesOther" placeholder="Any additional recruitment methods you want to include."></textarea>
 
-    <button onclick="generatePlan()">Generate Written Recruitment Plan</button>
+    <h3>Incentives & Benefits (choose up to 3)</h3>
+    <div class="row">
+      <div class="col">
+        <label><input type="checkbox" class="incOpt" data-label="Custom team jerseys and branding"> Custom team jerseys</label><br/>
+        <label><input type="checkbox" class="incOpt" data-label="Access to dedicated practice space and gaming equipment"> Dedicated practice space</label><br/>
+        <label><input type="checkbox" class="incOpt" data-label="Academic support and grade monitoring for eligibility"> Academic support & eligibility checks</label>
+      </div>
+      <div class="col">
+        <label><input type="checkbox" class="incOpt" data-label="Leadership roles (captain, shot-caller, analyst, content lead)"> Leadership opportunities</label><br/>
+        <label><input type="checkbox" class="incOpt" data-label="Travel opportunities for tournaments or scrims"> Travel to events/tournaments</label><br/>
+        <label><input type="checkbox" class="incOpt" data-label="Support for highlight reels and streaming content"> Highlights & streaming support</label>
+      </div>
+    </div>
+    <div class="small-note">You may select up to 3 incentives/benefits.</div>
+
+    <label for="incentivesOther">Other incentives (optional)</label>
+    <textarea id="incentivesOther" placeholder="Any additional benefits you want to offer."></textarea>
+
+    <button onclick="generatePlan()">Generate Written Recruitment Plan & Flyer</button>
     <div id="recruitmentPlanOut" class="output-block"></div>
 
     <h3>Auto-Generated Recruitment Flyer</h3>
     <div id="flyer" class="flyer"></div>
   </div>
 
-  <!-- TRAINING FRAMEWORK -->
+  <!-- 2. TRAINING FRAMEWORK -->
   <div class="panel">
     <h2>2️⃣ Training Framework</h2>
     <div class="row">
@@ -239,7 +264,7 @@
 
     <div class="row">
       <div class="col">
-        <label>Training Focus Areas (season)</label>
+        <label>Season Training Focus Areas</label>
         <div>
           <label><input type="checkbox" id="tf_mech" checked /> Mechanics</label><br/>
           <label><input type="checkbox" id="tf_strat" checked /> Strategy & VOD Review</label><br/>
@@ -253,7 +278,7 @@
     </div>
 
     <label for="season">Example Weekly Season Schedule</label>
-    <textarea id="season" placeholder="Example: 
+    <textarea id="season" placeholder="Example:
 Mon – Mechanics & micro drills
 Wed – VOD review & strategy work
 Thu – Scrims vs other schools
@@ -266,11 +291,11 @@ Fri – Match day with pre/post match talks"></textarea>
     <div id="trainingOut" class="output-block"></div>
   </div>
 
-  <!-- PLAYER POOL -->
+  <!-- 3. PLAYER POOL -->
   <div class="panel">
-    <h2>3️⃣ Virtual Player Pool</h2>
+    <h2>3️⃣ Virtual Player Pool (Select Exactly 5 Players)</h2>
     <p style="color:var(--muted);margin-top:0">
-      Each player has different strengths and risks. Choose <strong>3–6 players</strong> to build your roster. 
+      Each player has different strengths and risks. Choose <strong>exactly 5 players</strong> to build your roster.
       Your recruitment focus and training approach will interact with these attributes.
     </p>
     <div class="pill good">High Mechanics</div>
@@ -295,13 +320,14 @@ Fri – Match day with pre/post match talks"></textarea>
         <tbody id="playerTableBody"></tbody>
       </table>
     </div>
+    <div class="small-note">The system will prevent you from selecting more than 5 players.</div>
   </div>
 
-  <!-- SIMULATION -->
+  <!-- 4. SIMULATION -->
   <div class="panel">
     <h2>4️⃣ Run Season Simulation</h2>
     <p style="color:var(--muted);margin-top:0">
-      Click the button below after selecting your roster. The simulator will estimate team skill, cohesion, risk, and give you a season summary.
+      After you select your 5-player roster, click simulate to see your team’s skill, cohesion, risk, and outcome tier.
     </p>
     <button onclick="runSimulation()">Simulate Season Outcome</button>
 
@@ -323,6 +349,30 @@ Fri – Match day with pre/post match talks"></textarea>
     <h3 style="margin-top:14px;">Season Outcome</h3>
     <div id="outcomeSummary" class="output-block"></div>
   </div>
+
+  <!-- 5. REFLECTION STEP -->
+  <div class="panel">
+    <h2>5️⃣ Coach Reflection (Student Debrief)</h2>
+    <p style="color:var(--muted);margin-top:0">
+      After viewing your season outcome, answer the prompts below. Then click
+      <strong>Generate Reflection Summary</strong> to create a written reflection for submission.
+    </p>
+
+    <label for="ref1">1. How well did your roster and recruitment choices match your stated recruitment focus?</label>
+    <textarea id="ref1"></textarea>
+
+    <label for="ref2">2. How did your training framework (intensity, hours, focus areas) help or hurt your season outcome?</label>
+    <textarea id="ref2"></textarea>
+
+    <label for="ref3">3. If you could run another season, what would you change about recruitment, training, or roster selection, and why?</label>
+    <textarea id="ref3"></textarea>
+
+    <label for="ref4">4. How does this simulation connect to real-world esports (or traditional sports) program management?</label>
+    <textarea id="ref4"></textarea>
+
+    <button onclick="generateReflection()">Generate Reflection Summary</button>
+    <div id="reflectionOut" class="output-block"></div>
+  </div>
 </div>
 
 <script>
@@ -340,6 +390,8 @@ const playerPool = [
   {id:11,name:"Avery 'Glue' F.",role:"Shotcaller",mech:78,iq:88,comm:92,team:96,commit:87,toxic:10},
   {id:12,name:"Quinn 'NewBlood' T.",role:"Rookie",mech:82,iq:68,comm:72,team:75,commit:80,toxic:15}
 ];
+
+let lastSim = null;
 
 function renderPlayerTable(){
   const tbody = document.getElementById("playerTableBody");
@@ -367,18 +419,45 @@ function getCheckedPlayers(){
   return playerPool.filter(p=>ids.includes(p.id));
 }
 
+function getSelectedLabels(selector){
+  const boxes = document.querySelectorAll(selector);
+  const labels = [];
+  boxes.forEach(b=>{
+    if(b.checked) labels.push(b.dataset.label);
+  });
+  return labels;
+}
+
+function enforceLimit(selector,max,changedBox,message){
+  const boxes = document.querySelectorAll(selector);
+  const checked = Array.from(boxes).filter(b=>b.checked);
+  if(checked.length>max){
+    if(changedBox) changedBox.checked = false;
+    if(message) alert(message);
+  }
+}
+
 function generatePlan(){
   const teamName = document.getElementById("teamName").value || "Our Esports Program";
   const focus = document.getElementById("focus").value;
   const target = document.getElementById("targetGroup").value;
-  const strategies = document.getElementById("strategies").value;
-  const incentives = document.getElementById("incentives").value;
+
+  const acts = getSelectedLabels(".recOpt");
+  const actsOther = document.getElementById("strategiesOther").value.trim();
+  const incs = getSelectedLabels(".incOpt");
+  const incsOther = document.getElementById("incentivesOther").value.trim();
 
   let focusText = "";
   if(focus==="balanced") focusText = "We will balance mechanical skill with communication, academics, and positive team culture.";
   else if(focus==="mechanics") focusText = "We will prioritize high mechanical skill and ranked performance while still ensuring baseline culture and academic expectations.";
   else if(focus==="iq") focusText = "We will emphasize game sense, decision-making, and leadership, even if raw mechanics are still developing.";
   else if(focus==="culture") focusText = "We will prioritize communication, coachability, and positive culture as the foundation of our roster.";
+
+  let actsText = acts.length ? acts.map(a=>"• "+a).join("\n") : "(student selects recruitment activities)";
+  if(actsOther) actsText += "\n• " + actsOther;
+
+  let incsText = incs.length ? incs.map(a=>"• "+a).join("\n") : "(student selects incentives/benefits)";
+  if(incsOther) incsText += "\n• " + incsOther;
 
   const plan = 
 `${teamName.toUpperCase()} – RECRUITMENT PLAN
@@ -390,11 +469,11 @@ ${target || "(student fills this in)"}
 Recruitment Focus:
 ${focusText}
 
-Recruitment Strategies:
-${strategies || "(student fills this in)"}
+Recruitment Activities:
+${actsText}
 
 Incentives & Benefits:
-${incentives || "(student fills this in)"}
+${incsText}
 
 Timeline:
 • Week 1 – Launch campaign (post flyers, social media, announcements, counselor outreach)
@@ -406,13 +485,17 @@ Timeline:
   document.getElementById("recruitmentPlanOut").textContent = plan;
 
   const flyerDiv = document.getElementById("flyer");
+  const actsFlyer = acts.length ? acts.join("; ") : "Watch for announcements and visit the esports lab.";
+  const incsFlyer = incs.length ? incs.join("; ") : "Skill development, competition experience, and a positive team environment.";
+
   flyerDiv.innerHTML = `
     <h2>${teamName || "Join Our Esports Team"}</h2>
     <p style="text-align:center;font-weight:600;margin-bottom:4px;">LEVEL UP • COMPETE • BELONG</p>
     <hr />
     <p><strong>Who We're Looking For</strong><br>${target || "Motivated students who love our game, want to grow, and can be great teammates."}</p>
-    <p><strong>Why Join?</strong><br>${incentives || "Develop your skills, compete for our school, build friendships, and explore college/career paths in esports and STEM."}</p>
-    <p><strong>How to Get Involved</strong><br>${strategies || "Watch for posters and announcements, complete the interest form, and attend our tryouts/interest meeting."}</p>
+    <p><strong>Why Join?</strong><br>${incs.length ? incsFlyer : incsFlyer}</p>
+    <p><strong>How to Get Involved</strong><br>${acts.length ? actsFlyer : actsFlyer}</p>
+    ${incsOther ? `<p><strong>Extra Perks:</strong><br>${incsOther}</p>` : ""}
     <p style="text-align:center;margin-top:10px;font-size:0.85rem;">Questions? Visit the esports lab or talk with the program coach.</p>
   `;
 }
@@ -469,8 +552,8 @@ function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
 
 function runSimulation(){
   const roster = getCheckedPlayers();
-  if(roster.length<3 || roster.length>6){
-    alert("Select between 3 and 6 players to simulate a realistic roster.");
+  if(roster.length!==5){
+    alert("Select exactly 5 players to simulate a realistic team roster.");
     return;
   }
 
@@ -493,7 +576,7 @@ function runSimulation(){
   // Base scores
   let skill = (avgMech*0.55 + avgIQ*0.45);
   let cohesion = (avgComm*0.5 + avgTeam*0.5);
-  let cultureBase = (avgCommit*0.5 + (100-avgToxic)*0.5);
+  let fatigue = 0;
 
   // Training focus modifiers
   const mechFocus = document.getElementById("tf_mech").checked;
@@ -502,10 +585,9 @@ function runSimulation(){
 
   if(mechFocus) skill += 4;
   if(stratFocus) skill += 3;
-  if(cultFocus) cohesion += 6; // culture block boosts cohesion
+  if(cultFocus) cohesion += 6;
 
   // Pre-season intensity modifies preparedness vs burnout risk
-  let fatigue = 0;
   if(preIntensity==="low"){ skill -= 3; }
   else if(preIntensity==="high"){ skill += 5; fatigue += 6; }
 
@@ -518,7 +600,7 @@ function runSimulation(){
   cohesion -= avgToxic*0.15;
   cohesion = clamp(cohesion,0,100);
 
-  // Align/ misalign with recruitment focus
+  // Align/misalign with recruitment focus
   let focusBonus=0;
   let focusNote="";
   if(focus==="mechanics"){
@@ -531,13 +613,10 @@ function runSimulation(){
     if(avgComm>80 && avgTeam>80 && avgToxic<25){ focusBonus+=5; focusNote="You built a strong culture roster that fits your plan."; }
     else{ focusBonus-=2; focusNote="Some roster choices work against your culture-first plan."; }
   }else{
-    // balanced
     if(avgMech>75 && cohesion>75){ focusBonus+=3; focusNote="Balanced roster with good skill and cohesion."; }
   }
 
   skill = clamp(skill + focusBonus,0,100);
-
-  // Risk normalization
   risk = clamp(risk/1.5,0,100);
 
   // Decide outcome tier
@@ -557,7 +636,6 @@ function runSimulation(){
     notes.push("Talent, culture, and/or workload are misaligned. Major adjustments are needed.");
   }
 
-  // Add more feedback based on stats
   if(avgToxic>40){
     notes.push("High toxicity is dragging down cohesion and long-term success. Consider culture standards in recruitment.");
   }
@@ -613,10 +691,76 @@ Coach Notes:
   }
 
   document.getElementById("outcomeSummary").textContent = summary;
+
+  // store for reflection step
+  lastSim = {
+    teamName,
+    tier,
+    skill: Math.round(skill),
+    cohesion: Math.round(cohesion),
+    risk: Math.round(risk)
+  };
+}
+
+function generateReflection(){
+  if(!lastSim){
+    alert("Run the season simulation first so you have results to reflect on.");
+    return;
+  }
+  const r1 = document.getElementById("ref1").value || "(student response)";
+  const r2 = document.getElementById("ref2").value || "(student response)";
+  const r3 = document.getElementById("ref3").value || "(student response)";
+  const r4 = document.getElementById("ref4").value || "(student response)";
+
+  const text =
+`${lastSim.teamName.toUpperCase()} – COACH REFLECTION
+
+Season Outcome:
+• Tier: ${lastSim.tier}
+• Team Skill: ${lastSim.skill}/100
+• Cohesion: ${lastSim.cohesion}/100
+• Burnout / Risk: ${lastSim.risk}/100
+
+1. Alignment between recruitment focus, roster, and outcome:
+${r1}
+
+2. Impact of training framework (intensity, hours, focus areas):
+${r2}
+
+3. Changes for next season (recruitment, training, roster choices):
+${r3}
+
+4. Connection to real-world esports/sports program management:
+${r4}
+`;
+
+  document.getElementById("reflectionOut").textContent = text;
+}
+
+function setupLimits(){
+  // recruitment activities: max 3
+  document.querySelectorAll(".recOpt").forEach(cb=>{
+    cb.addEventListener("change",e=>{
+      enforceLimit(".recOpt",3,e.target,"You can select up to 3 recruitment activities.");
+    });
+  });
+  // incentives: max 3
+  document.querySelectorAll(".incOpt").forEach(cb=>{
+    cb.addEventListener("change",e=>{
+      enforceLimit(".incOpt",3,e.target,"You can select up to 3 incentives/benefits.");
+    });
+  });
+  // players: max 5
+  document.addEventListener("change",e=>{
+    if(e.target && e.target.classList.contains("playerCheck")){
+      enforceLimit(".playerCheck",5,e.target,"You can only select up to 5 players.");
+    }
+  });
 }
 
 // init
 renderPlayerTable();
+setupLimits();
 </script>
 </body>
 </html>
