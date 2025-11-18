@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Esports Recruitment, Staff & Outcome Simulator – Wizard</title>
+<title>Esports Recruitment, Staff & Outcome Simulator – Wizard (Buttons)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   :root{
@@ -188,30 +188,6 @@
   .pill.bad{border-color:var(--bad);color:var(--bad)}
   .pill.warn{border-color:var(--warn);color:var(--warn)}
 
-  table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:0.8rem;
-  }
-  th,td{
-    border-bottom:1px solid #242d4f;
-    padding:4px 6px;
-    text-align:left;
-  }
-  th{
-    position:sticky;
-    top:0;
-    background:#141b32;
-    z-index:1;
-  }
-  .table-wrap{
-    max-height:260px;
-    overflow:auto;
-    border-radius:10px;
-    border:1px solid var(--line);
-    margin-top:8px;
-  }
-
   .output-block{
     background:#050815;
     border-radius:12px;
@@ -279,6 +255,97 @@
     border:1px solid var(--line);
     margin-left:6px;
     color:var(--muted);
+  }
+
+  /* Option button style (for activities, incentives, staff) */
+  .option-grid{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .option-btn{
+    flex:1 1 220px;
+    border-radius:12px;
+    padding:8px 10px;
+    border:1px solid #2b355c;
+    background:#050815;
+    color:var(--muted);
+    text-align:left;
+    font-size:0.85rem;
+    cursor:pointer;
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    transition:all 0.15s ease-out;
+  }
+  .option-btn span.bullet{
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    border:1px solid #2b355c;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.75rem;
+  }
+  .option-btn.selected{
+    border-color:var(--accent);
+    background:rgba(106,168,255,0.12);
+    color:var(--text);
+    box-shadow:0 0 0 1px rgba(106,168,255,0.3);
+  }
+  .option-btn.selected span.bullet{
+    border-color:var(--accent);
+    background:var(--accent);
+    color:#050815;
+  }
+
+  /* Player cards */
+  .player-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:10px;
+    margin-top:10px;
+  }
+  .player-card{
+    border-radius:12px;
+    border:1px solid #2b355c;
+    background:#050815;
+    padding:8px 10px;
+    cursor:pointer;
+    transition:all 0.15s ease-out;
+    font-size:0.8rem;
+  }
+  .player-card-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:4px;
+  }
+  .player-name{
+    font-weight:600;
+    font-size:0.85rem;
+  }
+  .player-role{
+    font-size:0.75rem;
+    color:var(--muted);
+  }
+  .player-stats{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4px 8px;
+    margin-top:4px;
+  }
+  .stat-pill{
+    font-size:0.7rem;
+    padding:1px 6px;
+    border-radius:999px;
+    border:1px solid #2b355c;
+  }
+  .player-card.selected{
+    border-color:var(--accent);
+    background:rgba(106,168,255,0.18);
+    box-shadow:0 0 0 1px rgba(106,168,255,0.35);
   }
 
   /* Step transitions */
@@ -351,17 +418,34 @@
         Recruitment Activities
         <span class="count-tag" id="recCountTag">0 / 3 selected</span>
       </h3>
-      <div class="row">
-        <div class="col">
-          <label><input type="checkbox" class="recOpt" data-label="Social media campaign (Instagram, TikTok, Discord)"> Social media campaign</label><br/>
-          <label><input type="checkbox" class="recOpt" data-label="School announcements and hallway posters"> School announcements & posters</label><br/>
-          <label><input type="checkbox" class="recOpt" data-label="In-house tryout tournament"> In-house tryout tournament</label><br/>
-          <label><input type="checkbox" class="recOpt" data-label="Counselor & teacher referrals based on grades and behavior"> Counselor/teacher referrals</label>
+      <div class="option-grid">
+        <div class="option-btn recOpt" data-label="Social media campaign (Instagram, TikTok, Discord)">
+          <span class="bullet">+</span>
+          <div>Social media campaign (Instagram, TikTok, Discord)</div>
         </div>
-        <div class="col">
-          <label><input type="checkbox" class="recOpt" data-label="Open esports lab / drop-in play sessions"> Open lab / drop-in play</label><br/>
-          <label><input type="checkbox" class="recOpt" data-label="Collaboration with clubs (STEM, robotics, media, band, etc.)"> Collaboration with other clubs</label><br/>
-          <label><input type="checkbox" class="recOpt" data-label="Joint events with nearby schools or community centers"> Joint events with other schools</label>
+        <div class="option-btn recOpt" data-label="School announcements and hallway posters">
+          <span class="bullet">+</span>
+          <div>School announcements and hallway posters</div>
+        </div>
+        <div class="option-btn recOpt" data-label="In-house tryout tournament">
+          <span class="bullet">+</span>
+          <div>In-house tryout tournament</div>
+        </div>
+        <div class="option-btn recOpt" data-label="Counselor & teacher referrals based on grades and behavior">
+          <span class="bullet">+</span>
+          <div>Counselor & teacher referrals based on grades and behavior</div>
+        </div>
+        <div class="option-btn recOpt" data-label="Open esports lab / drop-in play sessions">
+          <span class="bullet">+</span>
+          <div>Open esports lab / drop-in play sessions</div>
+        </div>
+        <div class="option-btn recOpt" data-label="Collaboration with clubs (STEM, robotics, media, band, etc.)">
+          <span class="bullet">+</span>
+          <div>Collaboration with other clubs (STEM, robotics, media, band, etc.)</div>
+        </div>
+        <div class="option-btn recOpt" data-label="Joint events with nearby schools or community centers">
+          <span class="bullet">+</span>
+          <div>Joint events with nearby schools or community centers</div>
         </div>
       </div>
       <div class="small-note">You may select up to 3 recruitment activities.</div>
@@ -373,16 +457,30 @@
         Incentives & Benefits
         <span class="count-tag" id="incCountTag">0 / 3 selected</span>
       </h3>
-      <div class="row">
-        <div class="col">
-          <label><input type="checkbox" class="incOpt" data-label="Custom team jerseys and branding"> Custom team jerseys</label><br/>
-          <label><input type="checkbox" class="incOpt" data-label="Access to dedicated practice space and gaming equipment"> Dedicated practice space</label><br/>
-          <label><input type="checkbox" class="incOpt" data-label="Academic support and grade monitoring for eligibility"> Academic support & eligibility checks</label>
+      <div class="option-grid">
+        <div class="option-btn incOpt" data-label="Custom team jerseys and branding">
+          <span class="bullet">+</span>
+          <div>Custom team jerseys and branding</div>
         </div>
-        <div class="col">
-          <label><input type="checkbox" class="incOpt" data-label="Leadership roles (captain, shot-caller, analyst, content lead)"> Leadership opportunities</label><br/>
-          <label><input type="checkbox" class="incOpt" data-label="Travel opportunities for tournaments or scrims"> Travel to events/tournaments</label><br/>
-          <label><input type="checkbox" class="incOpt" data-label="Support for highlight reels and streaming content"> Highlights & streaming support</label>
+        <div class="option-btn incOpt" data-label="Access to dedicated practice space and gaming equipment">
+          <span class="bullet">+</span>
+          <div>Access to dedicated practice space and gaming equipment</div>
+        </div>
+        <div class="option-btn incOpt" data-label="Academic support and grade monitoring for eligibility">
+          <span class="bullet">+</span>
+          <div>Academic support and grade monitoring for eligibility</div>
+        </div>
+        <div class="option-btn incOpt" data-label="Leadership roles (captain, shot-caller, analyst, content lead)">
+          <span class="bullet">+</span>
+          <div>Leadership roles (captain, shot-caller, analyst, content lead)</div>
+        </div>
+        <div class="option-btn incOpt" data-label="Travel opportunities for tournaments or scrims">
+          <span class="bullet">+</span>
+          <div>Travel opportunities for tournaments or scrims</div>
+        </div>
+        <div class="option-btn incOpt" data-label="Support for highlight reels and streaming content">
+          <span class="bullet">+</span>
+          <div>Support for highlight reels and streaming content</div>
         </div>
       </div>
       <div class="small-note">You may select up to 3 incentives/benefits.</div>
@@ -452,33 +550,42 @@ Fri – Match day with pre/post match talks"></textarea>
     <div class="panel">
       <h2>3️⃣ Staff & Support Team</h2>
       <p style="color:var(--muted);margin-top:0">
-        Choose up to <strong>4</strong> additional staff roles. Head Coach is required and already included.
-        Staff choices affect performance, cohesion, and burnout/health risk.
+        Head Coach is required. Choose up to <strong>4</strong> additional staff roles. Staff choices affect performance, cohesion, and burnout/health risk.
       </p>
+      <p class="small-note"><strong>Required:</strong> Head Game Coach (already included in the simulation).</p>
+
       <h3>
         Staff Roles
         <span class="count-tag" id="staffCountTag">0 / 4 selected</span>
       </h3>
-      <div class="row">
-        <div class="col">
-          <label><input type="checkbox" class="staffOpt" data-label="Head Game Coach" data-skill="6" data-cohesion="3" data-risk="-1" checked disabled> Head Game Coach (required)</label>
-          <div class="small-note">Analyzes gameplay, teaches tactics, coordinates practice.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Analyst Coach" data-skill="5" data-cohesion="1" data-risk="-1"> Analyst Coach</label>
-          <div class="small-note">Uses data & VODs to find patterns and strategies.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Position Coach" data-skill="4" data-cohesion="1" data-risk="0"> Position Coach</label>
-          <div class="small-note">Specializes in roles/champions to refine skills.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Performance Scout" data-skill="3" data-cohesion="0" data-risk="0"> Performance Scout</label>
-          <div class="small-note">Scouts opponents & recruits, improves talent ID and prep.</div>
+      <div class="option-grid">
+        <div class="option-btn staffOpt" data-label="Analyst Coach" data-skill="5" data-cohesion="1" data-risk="-1">
+          <span class="bullet">+</span>
+          <div><strong>Analyst Coach</strong><br><span style="font-size:0.75rem;">Uses data & VODs to find patterns and strategies.</span></div>
         </div>
-        <div class="col">
-          <label><input type="checkbox" class="staffOpt" data-label="Life Coach / Psychologist" data-skill="1" data-cohesion="5" data-risk="-6"> Life Coach / Psychologist</label>
-          <div class="small-note">Supports mental health, stress, motivation, team dynamics.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Athletic Trainer" data-skill="0" data-cohesion="2" data-risk="-5"> Athletic Trainer</label>
-          <div class="small-note">Addresses posture, injuries, and physical strain from gaming.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Fitness Coach" data-skill="1" data-cohesion="2" data-risk="-3"> Fitness Coach</label>
-          <div class="small-note">Builds exercise routines to support performance & health.</div>
-          <label><input type="checkbox" class="staffOpt" data-label="Nutritionist" data-skill="0" data-cohesion="1" data-risk="-4"> Nutritionist</label>
-          <div class="small-note">Guides healthy eating, hydration, and sleep routines.</div>
+        <div class="option-btn staffOpt" data-label="Position Coach" data-skill="4" data-cohesion="1" data-risk="0">
+          <span class="bullet">+</span>
+          <div><strong>Position Coach</strong><br><span style="font-size:0.75rem;">Specializes in roles/champions to refine skills.</span></div>
+        </div>
+        <div class="option-btn staffOpt" data-label="Performance Scout" data-skill="3" data-cohesion="0" data-risk="0">
+          <span class="bullet">+</span>
+          <div><strong>Performance Scout</strong><br><span style="font-size:0.75rem;">Scouts opponents & recruits to improve talent ID and prep.</span></div>
+        </div>
+        <div class="option-btn staffOpt" data-label="Life Coach / Psychologist" data-skill="1" data-cohesion="5" data-risk="-6">
+          <span class="bullet">+</span>
+          <div><strong>Life Coach / Psychologist</strong><br><span style="font-size:0.75rem;">Supports mental health, stress, motivation, and team dynamics.</span></div>
+        </div>
+        <div class="option-btn staffOpt" data-label="Athletic Trainer" data-skill="0" data-cohesion="2" data-risk="-5">
+          <span class="bullet">+</span>
+          <div><strong>Athletic Trainer</strong><br><span style="font-size:0.75rem;">Addresses posture, injuries, and physical strain from gaming.</span></div>
+        </div>
+        <div class="option-btn staffOpt" data-label="Fitness Coach" data-skill="1" data-cohesion="2" data-risk="-3">
+          <span class="bullet">+</span>
+          <div><strong>Fitness Coach</strong><br><span style="font-size:0.75rem;">Builds exercise routines to support performance & health.</span></div>
+        </div>
+        <div class="option-btn staffOpt" data-label="Nutritionist" data-skill="0" data-cohesion="1" data-risk="-4">
+          <span class="bullet">+</span>
+          <div><strong>Nutritionist</strong><br><span style="font-size:0.75rem;">Guides healthy eating, hydration, and sleep routines.</span></div>
         </div>
       </div>
     </div>
@@ -498,25 +605,8 @@ Fri – Match day with pre/post match talks"></textarea>
         Roster Selection
         <span class="count-tag" id="playerCountTag">0 / 5 selected</span>
       </h3>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Select</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Mech</th>
-              <th>IQ</th>
-              <th>Comm</th>
-              <th>Team</th>
-              <th>Commit</th>
-              <th>Toxic</th>
-            </tr>
-          </thead>
-          <tbody id="playerTableBody"></tbody>
-        </table>
-      </div>
-      <div class="small-note">You cannot select more than 5 players.</div>
+      <div class="player-grid" id="playerGrid"></div>
+      <div class="small-note">Tap/click player cards to select. You cannot select more than 5 players.</div>
     </div>
   </div>
 
@@ -611,26 +701,16 @@ const totalSteps = 6;
 
 /* ---- Utility ---- */
 function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function getSelectedLabels(classSelector){
+  const btns = document.querySelectorAll(classSelector + ".selected");
+  return Array.from(btns).map(b=>b.dataset.label);
+}
+
 function getCheckedPlayers(){
-  const checks = document.querySelectorAll(".playerCheck:checked");
-  const ids = Array.from(checks).map(c=>parseInt(c.dataset.id,10));
+  const cards = document.querySelectorAll(".player-card.selected");
+  const ids = Array.from(cards).map(c=>parseInt(c.dataset.id,10));
   return playerPool.filter(p=>ids.includes(p.id));
-}
-function getSelectedLabels(selector){
-  const boxes = document.querySelectorAll(selector);
-  const labels = [];
-  boxes.forEach(b=>{
-    if(b.checked && !b.disabled) labels.push(b.dataset.label);
-  });
-  return labels;
-}
-function enforceLimit(selector,max,changedBox){
-  const boxes = document.querySelectorAll(selector);
-  const checked = Array.from(boxes).filter(b=>b.checked && !b.disabled);
-  if(checked.length>max){
-    if(changedBox) changedBox.checked = false;
-  }
-  return checked.length;
 }
 
 /* ---- Wizard Navigation ---- */
@@ -641,11 +721,9 @@ function updateStepUI(){
     s.classList.toggle("active", stepNum === currentStep);
   });
 
-  // progress bar
   const pct = (currentStep-1)/(totalSteps-1)*100;
   document.getElementById("progressFill").style.width = pct + "%";
 
-  // chips
   const chips = document.querySelectorAll(".step-chip");
   chips.forEach(ch=>{
     const n = parseInt(ch.dataset.stepLabel,10);
@@ -653,12 +731,9 @@ function updateStepUI(){
     ch.classList.toggle("completed", n < currentStep);
   });
 
-  // counter text
   const names = ["Recruitment","Training","Staff","Roster","Simulation","Reflection"];
-  const counterEl = document.getElementById("stepCounter");
-  counterEl.textContent = `Step ${currentStep} of ${totalSteps} · ${names[currentStep-1]}`;
+  document.getElementById("stepCounter").textContent = `Step ${currentStep} of ${totalSteps} · ${names[currentStep-1]}`;
 
-  // nav buttons
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   prevBtn.disabled = currentStep === 1;
@@ -672,23 +747,42 @@ function changeStep(delta){
   updateStepUI();
 }
 
-function renderPlayerTable(){
-  const tbody = document.getElementById("playerTableBody");
-  tbody.innerHTML = "";
+/* ---- Render player cards ---- */
+function renderPlayerGrid(){
+  const grid = document.getElementById("playerGrid");
+  grid.innerHTML = "";
   playerPool.forEach(p=>{
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td><input type="checkbox" class="playerCheck" data-id="${p.id}"></td>
-      <td>${p.name}</td>
-      <td>${p.role}</td>
-      <td>${p.mech}</td>
-      <td>${p.iq}</td>
-      <td>${p.comm}</td>
-      <td>${p.team}</td>
-      <td>${p.commit}</td>
-      <td>${p.toxic}</td>
+    const card = document.createElement("div");
+    card.className = "player-card";
+    card.dataset.id = p.id;
+    card.innerHTML = `
+      <div class="player-card-header">
+        <div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-role">${p.role}</div>
+        </div>
+      </div>
+      <div class="player-stats">
+        <span class="stat-pill">Mech: ${p.mech}</span>
+        <span class="stat-pill">IQ: ${p.iq}</span>
+        <span class="stat-pill">Comm: ${p.comm}</span>
+        <span class="stat-pill">Team: ${p.team}</span>
+        <span class="stat-pill">Commit: ${p.commit}</span>
+        <span class="stat-pill">Toxic: ${p.toxic}</span>
+      </div>
     `;
-    tbody.appendChild(tr);
+    card.addEventListener("click",()=>{
+      const selectedCards = document.querySelectorAll(".player-card.selected");
+      const alreadySelected = card.classList.contains("selected");
+      if(alreadySelected){
+        card.classList.remove("selected");
+      }else{
+        if(selectedCards.length >= 5) return;
+        card.classList.add("selected");
+      }
+      updateCounts();
+    });
+    grid.appendChild(card);
   });
 }
 
@@ -749,9 +843,8 @@ Timeline:
     <p style="text-align:center;font-weight:600;margin-bottom:4px;">LEVEL UP • COMPETE • BELONG</p>
     <hr />
     <p><strong>Who We're Looking For</strong><br>${target || "Motivated students who love our game, want to grow, and can be great teammates."}</p>
-    <p><strong>Why Join?</strong><br>${incsFlyer}</p>
+    <p><strong>Why Join?</strong><br>${incsFlyer}${incsOther ? "<br>"+incsOther : ""}</p>
     <p><strong>How to Get Involved</strong><br>${actsFlyer}</p>
-    ${incsOther ? `<p><strong>Extra Perks:</strong><br>${incsOther}</p>` : ""}
     <p style="text-align:center;margin-top:10px;font-size:0.85rem;">Questions? Visit the esports lab or talk with the program coach.</p>
   `;
 }
@@ -854,17 +947,15 @@ function runSimulation(){
   if(hours<=4){ cohesion += 2; }
   else if(hours>=9){ fatigue += 6; }
 
-  // staff modifiers
-  let staffSkill = 6; // head coach
+  // staff modifiers (Head Coach baked in)
+  let staffSkill = 6; // head coach baseline
   let staffCoh = 3;
   let staffRisk = -1;
-  const staffBoxes = document.querySelectorAll(".staffOpt");
-  staffBoxes.forEach(b=>{
-    if(b.checked && !b.disabled){
-      staffSkill += parseFloat(b.dataset.skill || "0");
-      staffCoh += parseFloat(b.dataset.cohesion || "0");
-      staffRisk += parseFloat(b.dataset.risk || "0");
-    }
+  const staffBtns = document.querySelectorAll(".staffOpt.selected");
+  staffBtns.forEach(b=>{
+    staffSkill += parseFloat(b.dataset.skill || "0");
+    staffCoh += parseFloat(b.dataset.cohesion || "0");
+    staffRisk += parseFloat(b.dataset.risk || "0");
   });
 
   skill += staffSkill*0.3;
@@ -981,7 +1072,6 @@ Coach Notes:
     risk: Math.round(risk)
   };
 
-  // auto-advance to reflection the first time they simulate
   currentStep = 6;
   updateStepUI();
 }
@@ -1024,11 +1114,10 @@ ${r4}
 
 /* ---- Counters & Limits ---- */
 function updateCounts(){
-  const recCount = document.querySelectorAll(".recOpt:checked").length;
-  const incCount = document.querySelectorAll(".incOpt:checked").length;
-  const staffCount = Array.from(document.querySelectorAll(".staffOpt"))
-    .filter(b=>b.checked && !b.disabled).length;
-  const playerCount = document.querySelectorAll(".playerCheck:checked").length;
+  const recCount = document.querySelectorAll(".recOpt.selected").length;
+  const incCount = document.querySelectorAll(".incOpt.selected").length;
+  const staffCount = document.querySelectorAll(".staffOpt.selected").length;
+  const playerCount = document.querySelectorAll(".player-card.selected").length;
 
   document.getElementById("recCountTag").textContent = `${recCount} / 3 selected`;
   document.getElementById("incCountTag").textContent = `${incCount} / 3 selected`;
@@ -1036,43 +1125,35 @@ function updateCounts(){
   document.getElementById("playerCountTag").textContent = `${playerCount} / 5 selected`;
 }
 
-function setupLimits(){
-  document.querySelectorAll(".recOpt").forEach(cb=>{
-    cb.addEventListener("change",e=>{
-      const count = enforceLimit(".recOpt",3,e.target);
-      updateCounts();
+function setupOptionButtons(){
+  // generic handler for recOpt (limit 3), incOpt (limit 3), staffOpt (limit 4)
+  function setupGroup(className, limit){
+    const btns = document.querySelectorAll(className);
+    btns.forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const selectedBtns = document.querySelectorAll(className + ".selected");
+        const alreadySelected = btn.classList.contains("selected");
+        if(alreadySelected){
+          btn.classList.remove("selected");
+        }else{
+          if(selectedBtns.length >= limit) return;
+          btn.classList.add("selected");
+        }
+        updateCounts();
+      });
     });
-  });
+  }
 
-  document.querySelectorAll(".incOpt").forEach(cb=>{
-    cb.addEventListener("change",e=>{
-      const count = enforceLimit(".incOpt",3,e.target);
-      updateCounts();
-    });
-  });
-
-  document.querySelectorAll(".staffOpt").forEach(cb=>{
-    if(cb.disabled) return;
-    cb.addEventListener("change",e=>{
-      const count = enforceLimit(".staffOpt",4,e.target);
-      updateCounts();
-    });
-  });
-
-  document.addEventListener("change",e=>{
-    if(e.target && e.target.classList.contains("playerCheck")){
-      enforceLimit(".playerCheck",5,e.target);
-      updateCounts();
-    }
-  });
+  setupGroup(".recOpt",3);
+  setupGroup(".incOpt",3);
+  setupGroup(".staffOpt",4);
 }
 
 /* ---- Init ---- */
-renderPlayerTable();
-setupLimits();
+renderPlayerGrid();
+setupOptionButtons();
 updateCounts();
 updateStepUI();
-
 </script>
 </body>
 </html>
