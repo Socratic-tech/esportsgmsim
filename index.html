@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Esports Athlete Recruitment & Team Outcome Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root{
+    --bg:#070b16;
+    --panel:#11172b;
+    --line:#1f2a52;
+    --text:#e8eeff;
+    --muted:#b9c8ff;
+    --accent:#6aa8ff;
+    --good:#10b981;
+    --bad:#ef4444;
+    --warn:#f59e0b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:radial-gradient(circle at top,#192247 0,#070b16 55%);
+    color:var(--text);
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;
+  }
+  h1,h2,h3{margin-top:0}
+  h1{font-size:1.9rem}
+  h2{font-size:1.4rem;color:var(--accent)}
+  h3{font-size:1.1rem;color:var(--muted)}
+  .container{
+    max-width:1100px;
+    margin:0 auto;
+    padding:20px;
+  }
+  .panel{
+    background:var(--panel);
+    border-radius:16px;
+    padding:18px 20px;
+    margin-bottom:18px;
+    border:1px solid var(--line);
+  }
+  label{font-weight:600;display:block;margin:8px 0 4px}
+  textarea,input,select{
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #2b355c;
+    background:#050815;
+    color:var(--text);
+    font-family:inherit;
+    font-size:0.95rem;
+  }
+  textarea{resize:vertical;min-height:60px}
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .col{
+    flex:1 1 250px;
+  }
+  button{
+    padding:10px 18px;
+    border-radius:999px;
+    border:none;
+    background:var(--accent);
+    color:#050815;
+    font-weight:700;
+    cursor:pointer;
+    font-size:0.95rem;
+    margin-top:10px;
+  }
+  button:hover{background:#8dbdff}
+  .pill{
+    display:inline-block;
+    padding:2px 10px;
+    border-radius:999px;
+    font-size:0.75rem;
+    font-weight:600;
+    background:#050815;
+    border:1px solid var(--line);
+    margin-right:4px;
+    margin-bottom:4px;
+  }
+  .pill.good{border-color:var(--good);color:var(--good)}
+  .pill.bad{border-color:var(--bad);color:var(--bad)}
+  .pill.warn{border-color:var(--warn);color:var(--warn)}
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:0.8rem;
+  }
+  th,td{
+    border-bottom:1px solid #242d4f;
+    padding:4px 6px;
+    text-align:left;
+  }
+  th{
+    position:sticky;
+    top:0;
+    background:#141b32;
+    z-index:1;
+  }
+  .table-wrap{
+    max-height:260px;
+    overflow:auto;
+    border-radius:10px;
+    border:1px solid var(--line);
+    margin-top:8px;
+  }
+  .output-block{
+    background:#050815;
+    border-radius:12px;
+    border:1px solid var(--line);
+    padding:12px 14px;
+    margin-top:10px;
+    white-space:pre-wrap;
+    font-size:0.9rem;
+  }
+  .flex{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .metric{
+    flex:1 1 160px;
+    background:#050815;
+    border-radius:12px;
+    border:1px solid var(--line);
+    padding:10px 12px;
+  }
+  .metric h4{
+    margin:0 0 4px;
+    font-size:0.9rem;
+    color:var(--muted);
+  }
+  .metric span{
+    font-size:1.1rem;
+    font-weight:700;
+  }
+  .badge{
+    display:inline-block;
+    padding:3px 8px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    font-size:0.75rem;
+    margin-left:6px;
+    color:var(--muted);
+  }
+  .badge.focus{border-color:var(--accent);color:var(--accent)}
+  .badge.risk{border-color:var(--bad);color:var(--bad)}
+  .flyer{
+    background:#f7f7ff;
+    color:#111827;
+    border-radius:14px;
+    padding:16px 18px;
+    margin-top:10px;
+  }
+  .flyer h2{
+    color:#111827;
+    text-align:center;
+    margin-top:0;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    font-size:1.2rem;
+  }
+  .flyer hr{
+    border:none;
+    border-top:2px solid #e5e7eb;
+    margin:8px 0 10px;
+  }
+  @media(max-width:720px){
+    .row{flex-direction:column}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🎮 Esports Athlete Recruitment & Outcome Simulator</h1>
+  <p style="color:var(--muted);max-width:800px">
+    Design a recruitment & training plan, then apply it to a virtual player pool. 
+    Your choices will determine how your team performs over the season.
+  </p>
+
+  <!-- PLAN SETUP -->
+  <div class="panel">
+    <h2>1️⃣ Recruitment Plan</h2>
+    <div class="row">
+      <div class="col">
+        <label for="teamName">Program / Team Name</label>
+        <input id="teamName" placeholder="Example: Lakeside Legends Esports" />
+      </div>
+      <div class="col">
+        <label for="focus">Recruitment Focus</label>
+        <select id="focus">
+          <option value="balanced">Balanced (Skill + Culture)</option>
+          <option value="mechanics">Raw Mechanics First</option>
+          <option value="iq">Game Sense & Esports IQ</option>
+          <option value="culture">Communication & Team Culture</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="targetGroup">Target Group (who are you recruiting?)</label>
+    <textarea id="targetGroup" placeholder="Example: High school students with at least Gold rank in Rocket League and a 2.5+ GPA who are interested in structured team play."></textarea>
+
+    <label for="strategies">Recruitment Strategies</label>
+    <textarea id="strategies" placeholder="Example: Social media campaign, in-house tournament, lunchroom booth, collaboration with counseling office for academic-eligible students."></textarea>
+
+    <label for="incentives">Incentives & Benefits</label>
+    <textarea id="incentives" placeholder="Example: Academic support, college esports info nights, jerseys, leadership roles, highlight reels."></textarea>
+
+    <button onclick="generatePlan()">Generate Written Recruitment Plan</button>
+    <div id="recruitmentPlanOut" class="output-block"></div>
+
+    <h3>Auto-Generated Recruitment Flyer</h3>
+    <div id="flyer" class="flyer"></div>
+  </div>
+
+  <!-- TRAINING FRAMEWORK -->
+  <div class="panel">
+    <h2>2️⃣ Training Framework</h2>
+    <div class="row">
+      <div class="col">
+        <label for="preIntensity">Pre-Season Intensity</label>
+        <select id="preIntensity">
+          <option value="low">Low (1–2 sessions/week)</option>
+          <option value="medium" selected>Medium (3 sessions/week)</option>
+          <option value="high">High (4–5 sessions/week)</option>
+        </select>
+      </div>
+      <div class="col">
+        <label for="hours">Average Weekly Hours (season)</label>
+        <input id="hours" type="number" min="1" max="20" value="6" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <label>Training Focus Areas (season)</label>
+        <div>
+          <label><input type="checkbox" id="tf_mech" checked /> Mechanics</label><br/>
+          <label><input type="checkbox" id="tf_strat" checked /> Strategy & VOD Review</label><br/>
+          <label><input type="checkbox" id="tf_culture" checked /> Team Culture & Wellness</label>
+        </div>
+      </div>
+      <div class="col">
+        <label for="preseason">Pre-Season Activities (summary)</label>
+        <textarea id="preseason" placeholder="Example: Aim training, role tryouts, team-building games, scrim block vs local schools, code of conduct workshop."></textarea>
+      </div>
+    </div>
+
+    <label for="season">Example Weekly Season Schedule</label>
+    <textarea id="season" placeholder="Example: 
+Mon – Mechanics & micro drills
+Wed – VOD review & strategy work
+Thu – Scrims vs other schools
+Fri – Match day with pre/post match talks"></textarea>
+
+    <label for="monitor">Progress Monitoring & Feedback</label>
+    <textarea id="monitor" placeholder="Example: Player goal sheets, stat tracking (K/D, goals, assists), wellness check-ins, mid-season 1:1s, end-of-season reflection."></textarea>
+
+    <button onclick="generateTraining()">Generate Training Framework</button>
+    <div id="trainingOut" class="output-block"></div>
+  </div>
+
+  <!-- PLAYER POOL -->
+  <div class="panel">
+    <h2>3️⃣ Virtual Player Pool</h2>
+    <p style="color:var(--muted);margin-top:0">
+      Each player has different strengths and risks. Choose <strong>3–6 players</strong> to build your roster. 
+      Your recruitment focus and training approach will interact with these attributes.
+    </p>
+    <div class="pill good">High Mechanics</div>
+    <div class="pill warn">Low Commitment</div>
+    <div class="pill bad">High Toxicity</div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Select</th>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Mech</th>
+            <th>IQ</th>
+            <th>Comm</th>
+            <th>Team</th>
+            <th>Commit</th>
+            <th>Toxic</th>
+          </tr>
+        </thead>
+        <tbody id="playerTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SIMULATION -->
+  <div class="panel">
+    <h2>4️⃣ Run Season Simulation</h2>
+    <p style="color:var(--muted);margin-top:0">
+      Click the button below after selecting your roster. The simulator will estimate team skill, cohesion, risk, and give you a season summary.
+    </p>
+    <button onclick="runSimulation()">Simulate Season Outcome</button>
+
+    <div class="flex" style="margin-top:14px;">
+      <div class="metric">
+        <h4>Team Skill Rating</h4>
+        <span id="m_skill">–</span>
+      </div>
+      <div class="metric">
+        <h4>Team Cohesion</h4>
+        <span id="m_cohesion">–</span>
+      </div>
+      <div class="metric">
+        <h4>Burnout / Risk</h4>
+        <span id="m_risk">–</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top:14px;">Season Outcome</h3>
+    <div id="outcomeSummary" class="output-block"></div>
+  </div>
+</div>
+
+<script>
+const playerPool = [
+  {id:1,name:"Alex 'Nova' R.",role:"Flex",mech:88,iq:82,comm:78,team:80,commit:85,toxic:15},
+  {id:2,name:"Sam 'Clutch' P.",role:"DPS/Striker",mech:95,iq:76,comm:60,team:62,commit:68,toxic:30},
+  {id:3,name:"Jordan 'CoachCam' L.",role:"Support/IGL",mech:70,iq:92,comm:95,team:94,commit:90,toxic:5},
+  {id:4,name:"Casey 'SoloQ' M.",role:"Carry",mech:93,iq:80,comm:45,team:40,commit:55,toxic:50},
+  {id:5,name:"Riley 'Macro' K.",role:"Analyst/Sub",mech:68,iq:88,comm:82,team:85,commit:88,toxic:10},
+  {id:6,name:"Taylor 'Grind' C.",role:"Offense",mech:90,iq:78,comm:70,team:72,commit:95,toxic:10},
+  {id:7,name:"Jamie 'Tilt' S.",role:"Flex",mech:80,iq:74,comm:50,team:52,commit:60,toxic:65},
+  {id:8,name:"Morgan 'Guardian' D.",role:"Support",mech:72,iq:86,comm:88,team:90,commit:92,toxic:8},
+  {id:9,name:"Parker 'Academics' J.",role:"Sub",mech:65,iq:80,comm:75,team:78,commit:98,toxic:5},
+  {id:10,name:"Devin 'Popoff' H.",role:"DPS",mech:97,iq:70,comm:55,team:50,commit:70,toxic:40},
+  {id:11,name:"Avery 'Glue' F.",role:"Shotcaller",mech:78,iq:88,comm:92,team:96,commit:87,toxic:10},
+  {id:12,name:"Quinn 'NewBlood' T.",role:"Rookie",mech:82,iq:68,comm:72,team:75,commit:80,toxic:15}
+];
+
+function renderPlayerTable(){
+  const tbody = document.getElementById("playerTableBody");
+  tbody.innerHTML = "";
+  playerPool.forEach(p=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input type="checkbox" class="playerCheck" data-id="${p.id}"></td>
+      <td>${p.name}</td>
+      <td>${p.role}</td>
+      <td>${p.mech}</td>
+      <td>${p.iq}</td>
+      <td>${p.comm}</td>
+      <td>${p.team}</td>
+      <td>${p.commit}</td>
+      <td>${p.toxic}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function getCheckedPlayers(){
+  const checks = document.querySelectorAll(".playerCheck:checked");
+  const ids = Array.from(checks).map(c=>parseInt(c.dataset.id,10));
+  return playerPool.filter(p=>ids.includes(p.id));
+}
+
+function generatePlan(){
+  const teamName = document.getElementById("teamName").value || "Our Esports Program";
+  const focus = document.getElementById("focus").value;
+  const target = document.getElementById("targetGroup").value;
+  const strategies = document.getElementById("strategies").value;
+  const incentives = document.getElementById("incentives").value;
+
+  let focusText = "";
+  if(focus==="balanced") focusText = "We will balance mechanical skill with communication, academics, and positive team culture.";
+  else if(focus==="mechanics") focusText = "We will prioritize high mechanical skill and ranked performance while still ensuring baseline culture and academic expectations.";
+  else if(focus==="iq") focusText = "We will emphasize game sense, decision-making, and leadership, even if raw mechanics are still developing.";
+  else if(focus==="culture") focusText = "We will prioritize communication, coachability, and positive culture as the foundation of our roster.";
+
+  const plan = 
+`${teamName.toUpperCase()} – RECRUITMENT PLAN
+=======================================
+
+Target Group:
+${target || "(student fills this in)"}
+
+Recruitment Focus:
+${focusText}
+
+Recruitment Strategies:
+${strategies || "(student fills this in)"}
+
+Incentives & Benefits:
+${incentives || "(student fills this in)"}
+
+Timeline:
+• Week 1 – Launch campaign (post flyers, social media, announcements, counselor outreach)
+• Week 2 – Interest meeting & Q&A + open lab play
+• Week 3 – Tryouts / in-house tournament with code of conduct overview
+• Week 4 – Roster decisions, parent communication, and onboarding meeting
+`;
+
+  document.getElementById("recruitmentPlanOut").textContent = plan;
+
+  const flyerDiv = document.getElementById("flyer");
+  flyerDiv.innerHTML = `
+    <h2>${teamName || "Join Our Esports Team"}</h2>
+    <p style="text-align:center;font-weight:600;margin-bottom:4px;">LEVEL UP • COMPETE • BELONG</p>
+    <hr />
+    <p><strong>Who We're Looking For</strong><br>${target || "Motivated students who love our game, want to grow, and can be great teammates."}</p>
+    <p><strong>Why Join?</strong><br>${incentives || "Develop your skills, compete for our school, build friendships, and explore college/career paths in esports and STEM."}</p>
+    <p><strong>How to Get Involved</strong><br>${strategies || "Watch for posters and announcements, complete the interest form, and attend our tryouts/interest meeting."}</p>
+    <p style="text-align:center;margin-top:10px;font-size:0.85rem;">Questions? Visit the esports lab or talk with the program coach.</p>
+  `;
+}
+
+function generateTraining(){
+  const preIntensity = document.getElementById("preIntensity").value;
+  const hours = parseInt(document.getElementById("hours").value,10) || 6;
+  const preseason = document.getElementById("preseason").value;
+  const season = document.getElementById("season").value;
+  const monitor = document.getElementById("monitor").value;
+
+  let preTxt = "";
+  if(preIntensity==="low") preTxt = "Low-intensity pre-season with 1–2 sessions per week focused on fundamentals and setting expectations.";
+  else if(preIntensity==="medium") preTxt = "Balanced pre-season with ~3 sessions per week focused on mechanics, team roles, and basic team systems.";
+  else preTxt = "High-intensity pre-season with 4–5 structured sessions per week building advanced strategies and deep coordination.";
+
+  const mech = document.getElementById("tf_mech").checked;
+  const strat = document.getElementById("tf_strat").checked;
+  const cult = document.getElementById("tf_culture").checked;
+
+  let focusAreas = [];
+  if(mech) focusAreas.push("mechanics & individual skill");
+  if(strat) focusAreas.push("strategy, VOD review, and macro decision-making");
+  if(cult) focusAreas.push("team culture, communication, and wellness");
+  if(focusAreas.length===0) focusAreas.push("unstructured play (no clear focus selected)");
+
+  const out = 
+`TRAINING FRAMEWORK
+===================
+
+Pre-Season Overview:
+${preTxt}
+
+Pre-Season Activities:
+${preseason || "(student fills this in)"}
+
+Season Training Focus:
+We will emphasize ${focusAreas.join(", ")} across the season.
+
+Weekly Time Commitment:
+Approximately ${hours} hours per week of structured esports activities (mix of practice, review, and matches).
+
+Example Weekly Schedule:
+${season || "(student fills this in)"}
+
+Progress Monitoring & Feedback:
+${monitor || "(student fills this in)"}
+`;
+
+  document.getElementById("trainingOut").textContent = out;
+}
+
+function clamp(v,min,max){return Math.max(min,Math.min(max,v));}
+
+function runSimulation(){
+  const roster = getCheckedPlayers();
+  if(roster.length<3 || roster.length>6){
+    alert("Select between 3 and 6 players to simulate a realistic roster.");
+    return;
+  }
+
+  const focus = document.getElementById("focus").value;
+  const preIntensity = document.getElementById("preIntensity").value;
+  const hours = parseInt(document.getElementById("hours").value,10) || 6;
+
+  let avgMech=0,avgIQ=0,avgComm=0,avgTeam=0,avgCommit=0,avgToxic=0;
+  roster.forEach(p=>{
+    avgMech+=p.mech;
+    avgIQ+=p.iq;
+    avgComm+=p.comm;
+    avgTeam+=p.team;
+    avgCommit+=p.commit;
+    avgToxic+=p.toxic;
+  });
+  const n = roster.length;
+  avgMech/=n; avgIQ/=n; avgComm/=n; avgTeam/=n; avgCommit/=n; avgToxic/=n;
+
+  // Base scores
+  let skill = (avgMech*0.55 + avgIQ*0.45);
+  let cohesion = (avgComm*0.5 + avgTeam*0.5);
+  let cultureBase = (avgCommit*0.5 + (100-avgToxic)*0.5);
+
+  // Training focus modifiers
+  const mechFocus = document.getElementById("tf_mech").checked;
+  const stratFocus = document.getElementById("tf_strat").checked;
+  const cultFocus = document.getElementById("tf_culture").checked;
+
+  if(mechFocus) skill += 4;
+  if(stratFocus) skill += 3;
+  if(cultFocus) cohesion += 6; // culture block boosts cohesion
+
+  // Pre-season intensity modifies preparedness vs burnout risk
+  let fatigue = 0;
+  if(preIntensity==="low"){ skill -= 3; }
+  else if(preIntensity==="high"){ skill += 5; fatigue += 6; }
+
+  // Weekly hours impact risk
+  if(hours<=4){ cohesion += 2; }
+  else if(hours>=9){ fatigue += 6; }
+
+  // Toxicity and low commitment add risk & hurt cohesion
+  let risk = avgToxic*0.5 + (100-avgCommit)*0.3 + fatigue*2;
+  cohesion -= avgToxic*0.15;
+  cohesion = clamp(cohesion,0,100);
+
+  // Align/ misalign with recruitment focus
+  let focusBonus=0;
+  let focusNote="";
+  if(focus==="mechanics"){
+    if(avgMech>avgIQ && avgMech>80){ focusBonus+=4; focusNote="Your roster matches your mechanics-first focus."; }
+    else{ focusBonus-=3; focusNote="Your roster does not fully match your mechanics-first recruitment focus."; }
+  }else if(focus==="iq"){
+    if(avgIQ>=avgMech && avgIQ>80){ focusBonus+=4; focusNote="Your roster matches your IQ/decision-making focus."; }
+    else{ focusBonus-=3; focusNote="Your roster does not fully support your IQ-focused plan."; }
+  }else if(focus==="culture"){
+    if(avgComm>80 && avgTeam>80 && avgToxic<25){ focusBonus+=5; focusNote="You built a strong culture roster that fits your plan."; }
+    else{ focusBonus-=2; focusNote="Some roster choices work against your culture-first plan."; }
+  }else{
+    // balanced
+    if(avgMech>75 && cohesion>75){ focusBonus+=3; focusNote="Balanced roster with good skill and cohesion."; }
+  }
+
+  skill = clamp(skill + focusBonus,0,100);
+
+  // Risk normalization
+  risk = clamp(risk/1.5,0,100);
+
+  // Decide outcome tier
+  let tier="";
+  let notes=[];
+  if(skill>=85 && cohesion>=75 && risk<=45){
+    tier="Championship Contender";
+    notes.push("Your team has high skill, strong cohesion, and manageable burnout risk.");
+  }else if(skill>=75 && cohesion>=60 && risk<=60){
+    tier="Playoff-Level Team";
+    notes.push("You can consistently compete with strong teams, but refinement is needed for a deep run.");
+  }else if(skill>=65 && cohesion>=45){
+    tier="Inconsistent Bubble Team";
+    notes.push("Some days you upset stronger teams, other days internal issues hold you back.");
+  }else{
+    tier="Struggling Roster";
+    notes.push("Talent, culture, and/or workload are misaligned. Major adjustments are needed.");
+  }
+
+  // Add more feedback based on stats
+  if(avgToxic>40){
+    notes.push("High toxicity is dragging down cohesion and long-term success. Consider culture standards in recruitment.");
+  }
+  if(avgCommit<70){
+    notes.push("Low average commitment increases risk of no-shows, burnout, or academic ineligibility.");
+  }
+  if(mechFocus && !document.getElementById("tf_mech").checked){
+    notes.push("You recruited for mechanics but did not emphasize mechanics enough in training.");
+  }
+  if(cultFocus && !document.getElementById("tf_culture").checked){
+    notes.push("You recruited for culture but did not protect it with dedicated culture/wellness time.");
+  }
+  if(hours>10){
+    notes.push("Heavy weekly hours increase burnout risk. Consider reducing load or adding structured breaks.");
+  }
+  if(hours<4){
+    notes.push("Very low weekly hours may limit skill growth compared to other programs.");
+  }
+
+  document.getElementById("m_skill").textContent = Math.round(skill);
+  document.getElementById("m_cohesion").textContent = Math.round(cohesion);
+  document.getElementById("m_risk").textContent = Math.round(risk);
+
+  const teamName = document.getElementById("teamName").value || "Your Team";
+  const rosterList = roster.map(p=>`• ${p.name} (${p.role})`).join("\n");
+
+  let summary =
+`${teamName.toUpperCase()} – SEASON SUMMARY
+Outcome Tier: ${tier}
+
+Roster Selected:
+${rosterList}
+
+Key Metrics:
+• Team Skill Rating: ${Math.round(skill)}/100
+• Team Cohesion: ${Math.round(cohesion)}/100
+• Burnout / Risk Level: ${Math.round(risk)}/100
+
+Focus Alignment:
+${focusNote || "Your roster has a mixed alignment with your stated recruitment focus."}
+
+Coach Notes:
+- Avg Mechanics: ${Math.round(avgMech)}
+- Avg Game Sense / IQ: ${Math.round(avgIQ)}
+- Avg Communication: ${Math.round(avgComm)}
+- Avg Team Orientation: ${Math.round(avgTeam)}
+- Avg Commitment: ${Math.round(avgCommit)}
+- Avg Toxicity: ${Math.round(avgToxic)}
+`;
+
+  if(notes.length){
+    summary += `\nSuggestions for Improvement:\n${notes.map(n=>`• ${n}`).join("\n")}`;
+  }
+
+  document.getElementById("outcomeSummary").textContent = summary;
+}
+
+// init
+renderPlayerTable();
+</script>
+</body>
+</html>
