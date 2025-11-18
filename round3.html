@@ -878,15 +878,18 @@ function renderPlayerGrid(){
     div.className = "player-card";
     div.dataset.id = p.id;
     const pers = p.personality || "";
-    div.innerHTML = `
-      <strong>${p.name}</strong> <em>(${p.role})</em><br><br>
-      <strong>Background:</strong> ${p.background}<br>
-      <strong>Motivation:</strong> ${p.motivation}<br><br>
-      <strong>Stats:</strong><br>
-      Mech ${p.mech} | IQ ${p.iq}<br>
-      Comm ${p.comm} | Team ${p.team}<br>
-      Commit ${p.commit} | Toxic ${p.toxic}
-    `;
+   div.innerHTML = `
+  <strong>${p.name}</strong> <em>(${p.role})</em><br><br>
+  <strong>Background:</strong> ${p.background}<br>
+  <strong>Motivation:</strong> ${p.motivation}<br>
+  <strong>Personality:</strong> ${p.personality}<br>
+  <strong>Preferences:</strong> ${p.preferences}<br><br>
+  <strong>Stats:</strong><br>
+  Mech ${p.mech} | IQ ${p.iq}<br>
+  Comm ${p.comm} | Team ${p.team}<br>
+  Commit ${p.commit} | Toxic ${p.toxic}
+`;
+
     div.onclick = ()=>{
       const count = document.querySelectorAll(".player-card.selected").length;
       if(!div.classList.contains("selected") && count >= 5) return;
