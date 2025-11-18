@@ -935,102 +935,167 @@ ${m}`;
 /* ============================================================
    SIMULATION
 ============================================================ */
-function runSimulation(){
+function runSimulation() {
   const roster = [...document.querySelectorAll(".player-card.selected")]
-                 .map(div => availablePlayerPool.find(p=>p.id==div.dataset.id));
+    .map(div => availablePlayerPool.find(p => p.id == div.dataset.id));
 
-  if(roster.length!==5){
+  if (roster.length !== 5) {
     alert("Select exactly 5 players.");
     return;
   }
 
-  let skill=0, coh=0, risk=0;
+  // Base statistics
+  let skill = 0;
+  let coh = 0;
+  let risk = 0;
 
-  roster.forEach(p=>{
+  // Add raw player skill + cohesion
+  roster.forEach(p => {
     skill += p.mech + p.iq;
     coh += p.comm + p.team;
   });
-/* -------------------------------------------------------------
-   NEW RISK FORMULA — REALISTIC ESPORTS WELLNESS MODEL
-------------------------------------------------------------- */
 
-// BASE RISK from players
-risk = 0;
+  // Normalize skill + cohesion (keep the original behavior)
+  skill = Math.round(skill / 10);
+  coh = Math.round(coh / 10);
 
-roster.forEach(p => {
-  // Toxicity: heaviest weight
-  risk += p.toxic * 1.4;
+  /* -------------------------------------------------------------
+     NEW RISK FORMULA — REALISTIC ESPORTS WELLNESS MODEL
+  ------------------------------------------------------------- */
 
-  // Low commitment: medium weight
-  risk += (100 - p.commit) * 0.4;
+  // Reset risk for new formula
+  risk = 0;
 
-  // Personality instability
-  if (p.personality.includes("chaotic") ||
+  roster.forEach(p => {
+    // Toxicity matters most
+    risk += p.toxic * 1.4;
+
+    // Low commitment increases instability
+    risk += (100 - p.commit) * 0.4;
+
+    // Personality risk factors
+    if (
+      p.personality.includes("chaotic") ||
       p.personality.includes("volatile") ||
       p.personality.includes("ego") ||
-      p.personality.includes("emotional")) {
-    risk += 15;
-  }
+      p.personality.includes("emotional")
+    ) {
+      risk += 15;
+    }
 
-  // Positive psychological profiles reduce risk
-  if (p.personality.includes("calm") ||
+    // Personality stability
+    if (
+      p.personality.includes("calm") ||
       p.personality.includes("selfless") ||
       p.personality.includes("protective") ||
       p.personality.includes("supportive") ||
-      p.personality.includes("empathetic")) {
-    risk -= 10;
-  }
-});
+      p.personality.includes("empathetic")
+    ) {
+      risk -= 10;
+    }
+  });
 
-/* -------------------------------------------------------------
-   TRAINING-RELATED RISK
-------------------------------------------------------------- */
-const hours = parseInt(document.getElementById("hours").value);
+  /* -------------------------------------------------------------
+     TRAINING-RELATED RISK
+  ------------------------------------------------------------- */
 
-if (hours >= 9) risk += 20;
-if (hours >= 7 && hours < 9) risk += 10;
-if (hours <= 3) risk += 5;
+  const hours = parseInt(document.getElementById("hours").value);
+  const intensity = document.getElementById("preIntensity").value;
 
-const intensity = document.getElementById("preIntensity").value;
+  // Overtraining = risk
+  if (hours >= 9) risk += 20;
+  else if (hours >= 7) risk += 10;
 
-if (intensity === "high") risk += 15;
-if (intensity === "low") risk -= 7;
+  // Undertraining = frustration
+  if (hours <= 3) risk += 5;
 
-if (document.getElementById("tf_culture").checked) risk -= 12;
+  // Preseason intensity
+  if (intensity === "high") risk += 15;
+  if (intensity === "low") risk -= 7;
 
-/* -------------------------------------------------------------
-   STAFF EFFECTS
-------------------------------------------------------------- */
-document.querySelectorAll(".staffOpt.selected").forEach(btn => {
-  const staffName = btn.textContent.toLowerCase();
+  // Culture training reduces risk
+  if (document.getElementById("tf_culture").checked) risk -= 12;
 
-  if (staffName.includes("psychologist")) risk -= 18;
-  if (staffName.includes("wellness")) risk -= 12;
-  if (staffName.includes("nutritionist")) risk -= 6;
-  if (staffName.includes("life coach")) risk -= 15;
+  /* -------------------------------------------------------------
+     STAFF EFFECTS
+  ------------------------------------------------------------- */
 
-  if (staffName.includes("talent scout")) risk += 8;
-});
+  document.querySelectorAll(".staffOpt.selected").forEach(btn => {
+    const staffName = btn.textContent.toLowerCase();
 
-/* -------------------------------------------------------------
-   ROLE BALANCE RISK
-------------------------------------------------------------- */
-let roles = roster.map(p => p.role);
-let dps = roles.filter(r => r === "DPS").length;
-let tank = roles.filter(r => r === "Tank").length;
-let supp = roles.filter(r => r === "Support").length;
+    if (staffName.includes("psychologist")) risk -= 18;
+    if (staffName.includes("wellness")) risk -= 12;
+    if (staffName.includes("nutritionist")) risk -= 6;
+    if (staffName.includes("life coach")) risk -= 15;
 
-if (supp === 0) risk += 40;
-if (dps >= 3) risk += 15;
-if (tank >= 3) risk += 10;
+    // Scouts increase pressure
+    if (staffName.includes("talent scout")) risk += 8;
+  });
 
-/* -------------------------------------------------------------
-   FINAL NORMALIZATION
-------------------------------------------------------------- */
-risk = Math.round(risk * 0.9); // soften
-risk = Math.max(0, risk); // clamp
+  /* -------------------------------------------------------------
+     ROLE BALANCE RISK
+  ------------------------------------------------------------- */
 
-document.getElementById("m_risk").textContent = risk;
+  const roles = roster.map(p => p.role);
+  const dps = roles.filter(r => r === "DPS").length;
+  const tank = roles.filter(r => r === "Tank").length;
+  const supp = roles.filter(r => r === "Support").length;
+
+  if (supp === 0) risk += 40; // no supports = disaster
+  if (dps >= 3) risk += 15;   // ego clashes
+  if (tank >= 3) risk += 10;  // low flexibility
+
+  /* -------------------------------------------------------------
+     FINAL NORMALIZATION
+  ------------------------------------------------------------- */
+
+  risk = Math.round(risk * 0.9); // soften spikes
+  risk = Math.max(0, risk);      // clamp flooring
+
+  // Write to UI
+  document.getElementById("m_risk").textContent = risk;
+
+  /* -------------------------------------------------------------
+     SKILL + COHESION STAFF/TRAINING EFFECTS (UNCHANGED)
+  ------------------------------------------------------------- */
+
+  // Training boosts
+  if (document.getElementById("tf_mech").checked) skill += 5;
+  if (document.getElementById("tf_strat").checked) skill += 4;
+
+  // Staff bonuses already handled skill & coh earlier, so:
+  document.querySelectorAll(".staffOpt.selected").forEach(btn => {
+    skill += parseInt(btn.dataset.skill);
+    coh += parseInt(btn.dataset.cohesion);
+  });
+
+  // Clamp skill/cohesion
+  skill = Math.min(200, Math.max(0, skill));
+  coh = Math.min(200, Math.max(0, coh));
+
+  document.getElementById("m_skill").textContent = skill;
+  document.getElementById("m_cohesion").textContent = coh;
+
+  /* -------------------------------------------------------------
+     FINAL OUTCOME TIER
+  ------------------------------------------------------------- */
+
+  let tier = "Average Season";
+
+  if (skill > 140 && coh > 120 && risk < 20)
+    tier = "Championship Contender";
+  else if (skill > 120 && coh > 100)
+    tier = "Strong Competitive Season";
+  else if (skill < 90 || coh < 90)
+    tier = "Struggling Season";
+
+  document.getElementById("outcomeSummary").textContent =
+    `Season Outcome: ${tier}\nSkill: ${skill}\nCohesion: ${coh}\nRisk: ${risk}`;
+}
+document.getElementById("outcomeSummary").textContent =
+    `Season Outcome: ${tier}\nSkill: ${skill}\nCohesion: ${coh}\nRisk: ${risk}`;
+
+document.querySelector('.step5').scrollIntoView({behavior:'smooth'});
 
 
 /* ============================================================
