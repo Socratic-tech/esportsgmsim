@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Esports GM: Final Edition</title>
+    <title>Esports GM: Personality Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -71,7 +71,7 @@
         h2 { font-size: 1.5rem; margin-bottom: 1rem; text-transform: uppercase; color: var(--text-main); }
         p { color: var(--text-dim); max-width: 650px; line-height: 1.6; font-size: 1.1rem; margin-bottom: 2rem; }
 
-        /* --- Standard Cards (Recruitment/Training) --- */
+        /* --- Cards --- */
         .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
         
         .card {
@@ -86,35 +86,27 @@
         .card:hover { border-color: var(--primary); transform: translateY(-3px); background: rgba(20, 22, 28, 0.9); }
         .card.selected { border: 1px solid var(--primary); background: rgba(0, 240, 255, 0.05); box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.1); }
 
-        /* --- PLAYER CARDS SPECIFIC --- */
+        /* --- PLAYER CARD STYLING --- */
         .player-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            border-top: 4px solid var(--text-dim); /* Default border */
-            padding-top: 2rem;
+            display: flex; flex-direction: column; align-items: center; text-align: center;
+            border-top: 4px solid var(--text-dim); padding-top: 1.5rem;
         }
         
         .player-avatar {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            margin-bottom: 1rem;
-            background: #333;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 2rem; font-weight: bold;
-            border: 3px solid rgba(255,255,255,0.1);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 70px; height: 70px; border-radius: 50%; margin-bottom: 0.5rem;
+            background: #333; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; font-weight: bold; border: 3px solid rgba(255,255,255,0.1);
         }
 
-        .player-role {
-            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;
-            background: #222; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.5rem;
-        }
-
-        .player-name { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .player-role { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; background: #222; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.5rem; }
+        .player-name { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.2rem; color: #fff; }
         
-        /* Role Coloring */
+        /* Traits */
+        .trait-badge {
+            font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; margin-bottom: 1rem;
+            font-family: 'JetBrains Mono'; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.2);
+        }
+        
         .role-duelist { border-top-color: var(--role-duelist); }
         .role-duelist .player-role { color: var(--role-duelist); border: 1px solid var(--role-duelist); }
         
@@ -127,7 +119,7 @@
         .role-initiator { border-top-color: var(--role-initiator); }
         .role-initiator .player-role { color: var(--role-initiator); border: 1px solid var(--role-initiator); }
 
-        /* --- Buttons & Controls --- */
+        /* --- Buttons --- */
         .btn {
             background: var(--primary); color: #000; border: none; padding: 1rem 2rem;
             font-family: 'Rajdhani'; font-weight: 700; font-size: 1.1rem; text-transform: uppercase;
@@ -173,41 +165,43 @@
 
 <main>
     <section id="view-intro" class="fade-in">
-        <h1>Initiating Season 3</h1>
-        <p>Welcome back, Head Coach. The league has reset. Construct a roster capable of championship performance while managing the psychological toll of competition.</p>
-        <button class="btn" onclick="game.nextStep()">Boot System</button>
+        <h1>Season 3: The Rebuild</h1>
+        <p>Welcome back, Coach. The previous roster has been dissolved. You need to build a team that balances raw mechanical talent with the mental resilience to survive the league.</p>
+        <button class="btn" onclick="game.nextStep()">Initialize System</button>
     </section>
 
     <section id="view-recruitment" class="hidden fade-in">
-        <h2>01 // Recruitment Protocol</h2>
-        <p>Select exactly <strong>3 channels</strong> to source talent. Higher cost means better players, but less budget for the season.</p>
+        <h2>01 // Recruitment Channels</h2>
+        <p>Where are you looking for players? (Select 3)</p>
         <div class="card-grid" id="recruitment-options"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <div style="display: flex; justify-content: flex-end;">
             <button class="btn" id="btn-recruit-next" onclick="game.nextStep()" disabled>Confirm Channels</button>
         </div>
     </section>
 
     <section id="view-training" class="hidden fade-in">
-        <h2>02 // Training Parameters</h2>
+        <h2>02 // Training Framework</h2>
         <div style="background: var(--bg-panel); padding: 2rem; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 2rem;">
             <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
                 <label style="font-weight: 700;">Scrim Schedule Intensity</label>
                 <span id="val-hours" style="color: var(--primary)">20 Hours/Week</span>
             </div>
             <input type="range" min="10" max="60" value="20" step="5" oninput="game.updateTraining(this.value)">
-            <div style="margin-top: 1rem; font-size: 0.9rem;" id="training-impact">Sustainable Pace.</div>
+            <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-dim);">
+                Impact: <span id="training-impact">Sustainable Pace.</span>
+            </div>
         </div>
-        <h3>Primary Focus</h3>
+        <h3>Focus Area</h3>
         <div class="card-grid" id="training-focus"></div>
         <div style="display: flex; justify-content: flex-end; gap: 1rem;">
             <button class="btn btn-outline" onclick="game.prevStep()">Back</button>
-            <button class="btn" onclick="game.nextStep()">Generate Roster</button>
+            <button class="btn" onclick="game.nextStep()">Open Player Pool</button>
         </div>
     </section>
 
     <section id="view-roster" class="hidden fade-in">
-        <h2>03 // Roster Selection</h2>
-        <p>Select exactly <strong>5 Players</strong> to sign to your team. Look for high skill, but ensure role diversity.</p>
+        <h2>03 // Draft Roster</h2>
+        <p>Select <strong>5 Players</strong>. Pay attention to their <strong>Personality Traits</strong> — a team of "Tilters" will fail, no matter how high their skill is.</p>
         
         <div class="card-grid" id="roster-pool">
             </div>
@@ -219,13 +213,14 @@
     </section>
 
     <section id="view-sim" class="hidden fade-in">
-        <h2>04 // Season Simulation</h2>
+        <h2>04 // League Simulation</h2>
         <div style="background: #08090b; border: 1px solid var(--border); padding: 20px; height: 300px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; border-left: 4px solid var(--primary);" id="sim-terminal">
             <div>> SYSTEM READY.</div>
         </div>
         <div id="sim-results" class="hidden" style="margin-top: 2rem; text-align: center; background: var(--bg-panel); padding: 2rem;">
             <h1 id="final-rank">RANK: 8th Place</h1>
-            <button class="btn" onclick="location.reload()">Restart Season</button>
+            <p id="final-summary">Season Complete.</p>
+            <button class="btn" onclick="location.reload()">New Season</button>
         </div>
         <div class="nav-footer" id="sim-controls" style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
             <button class="btn btn-outline" onclick="game.prevStep()">Adjust</button>
@@ -237,16 +232,24 @@
 <script>
 const DB = {
     recruitment: [
-        { id: 'social', title: 'Social Media', desc: 'High volume, random quality.', cost: 2000, skillMod: 5, riskMod: 5 },
-        { id: 'school', title: 'Uni League', desc: 'Disciplined, lower mechanic ceiling.', cost: 500, skillMod: 2, riskMod: -5 },
+        { id: 'social', title: 'Social Media', desc: 'High volume. Chaotic quality.', cost: 2000, skillMod: 5, riskMod: 5 },
+        { id: 'school', title: 'Uni League', desc: 'Disciplined but raw mechanics.', cost: 500, skillMod: 2, riskMod: -5 },
         { id: 'tourney', title: 'Invitational', desc: 'Battle-tested talent.', cost: 3000, skillMod: 8, riskMod: 2 },
-        { id: 'scout', title: 'Scouting Network', desc: 'Analytically perfect fits.', cost: 4000, skillMod: 10, riskMod: 0 },
-        { id: 'club', title: 'Local LANs', desc: 'Grassroots culture.', cost: 500, skillMod: 3, riskMod: -10 }
+        { id: 'scout', title: 'Data Scouts', desc: 'Analytically perfect fits.', cost: 4000, skillMod: 10, riskMod: 0 },
+        { id: 'club', title: 'Local LANs', desc: 'Strong vibes, lower skill.', cost: 500, skillMod: 3, riskMod: -10 }
     ],
     focus: [
         { id: 'mech', title: 'Mechanics', desc: 'Aim & Movement.', skill: 10, cohesion: -5 },
         { id: 'vod', title: 'Strategy', desc: 'Map Control Theory.', skill: 5, cohesion: 5 },
         { id: 'bond', title: 'Mental', desc: 'Psychology & Trust.', skill: -2, cohesion: 12 }
+    ],
+    traits: [
+        { label: 'IGL', effect: 'Cohesion++', color: '#00f0ff', skillMod: -5, cohMod: 15, riskMod: 0 },
+        { label: 'Prodigy', effect: 'Skill++', color: '#ffcc00', skillMod: 15, cohMod: -5, riskMod: 0 },
+        { label: 'Toxic', effect: 'Skill++ / Cohesion--', color: '#ff2a6d', skillMod: 20, cohMod: -20, riskMod: 10 },
+        { label: 'Veteran', effect: 'Risk--', color: '#a29bfe', skillMod: 5, cohMod: 5, riskMod: -20 },
+        { label: 'Tilter', effect: 'Risk++', color: '#ff7675', skillMod: 10, cohMod: -5, riskMod: 25 },
+        { label: 'Vibes', effect: 'Cohesion+', color: '#55efc4', skillMod: -10, cohMod: 20, riskMod: -10 }
     ],
     names: ['Viper', 'Chronos', 'Jinx', 'Neo', 'Frost', 'Ace', 'Ghost', 'Spark', 'Kilo', 'Luna', 'Rift', 'Echo', 'Void', 'Solar']
 };
@@ -283,7 +286,7 @@ class Game {
     nextStep() { this.changeStep(1); }
     prevStep() { this.changeStep(-1); }
 
-    // Recruitment
+    // --- Recruitment ---
     renderRecruitment() {
         document.getElementById('recruitment-options').innerHTML = DB.recruitment.map(opt => `
             <div class="card" onclick="game.toggleRecruit(this, '${opt.id}')">
@@ -310,12 +313,13 @@ class Game {
         this.updateHUD();
     }
 
-    // Training
+    // --- Training ---
     updateTraining(val) {
         this.state.risk = val < 30 ? 10 : (val < 50 ? 45 : 85);
         document.getElementById('val-hours').innerText = val + ' Hours';
-        document.getElementById('training-impact').innerText = val < 30 ? 'Sustainable.' : (val < 50 ? 'High Growth.' : 'CRITICAL RISK.');
-        document.getElementById('training-impact').style.color = val > 50 ? 'var(--danger)' : 'var(--text-dim)';
+        const impact = document.getElementById('training-impact');
+        impact.innerText = val < 30 ? 'Sustainable.' : (val < 50 ? 'High Growth.' : 'CRITICAL RISK.');
+        impact.style.color = val > 50 ? 'var(--danger)' : (val > 30 ? 'var(--warning)' : '#00ff88');
         this.updateHUD();
     }
     renderFocus() {
@@ -334,7 +338,7 @@ class Game {
         this.updateHUD();
     }
 
-    // Roster
+    // --- Roster & Traits ---
     generatePlayerPool() {
         const container = document.getElementById('roster-pool');
         container.innerHTML = '';
@@ -342,24 +346,39 @@ class Game {
         
         for(let i=0; i<8; i++) {
             const name = DB.names[Math.floor(Math.random() * DB.names.length)];
-            const pSkill = Math.floor(this.state.skill + (Math.random() * 20 - 10));
             const role = roles[Math.floor(Math.random() * roles.length)];
             
-            // Card Generation
+            // 1. Select Trait
+            const trait = DB.traits[Math.floor(Math.random() * DB.traits.length)];
+
+            // 2. Calculate Stats based on Current Team State + Trait Modifiers
+            // We add random variance (Math.random) + Trait specific buffs/debuffs
+            let pSkill = Math.floor(this.state.skill + (Math.random() * 15 - 5) + trait.skillMod);
+            
+            // Clamp skill 0-100
+            pSkill = Math.max(10, Math.min(99, pSkill));
+
+            const playerObj = { id: i, name, role, skill: pSkill, trait: trait };
+            this.state.pool.push(playerObj);
+
+            // Visuals
             const deg = Math.floor(Math.random() * 360);
             const c1 = Math.floor(Math.random()*16777215).toString(16);
             const c2 = Math.floor(Math.random()*16777215).toString(16);
             
-            this.state.pool.push({ id: i, name, skill: pSkill, role });
-
             container.innerHTML += `
                 <div class="card player-card role-${role.toLowerCase()}" onclick="game.togglePlayer(this, ${i})">
                     <div class="player-role">${role}</div>
                     <div class="player-avatar" style="background: linear-gradient(${deg}deg, #${c1}, #${c2})">${name[0]}</div>
                     <div class="player-name">${name}</div>
+                    
+                    <div class="trait-badge" style="color:${trait.color}; border-color:${trait.color}">
+                        ${trait.label}: ${trait.effect}
+                    </div>
+
                     <div style="width:100%; padding:0 10px;">
                          <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-dim); margin-bottom:4px;">
-                            <span>Rating</span> <span>${pSkill}</span>
+                            <span>Skill Rating</span> <span>${pSkill}</span>
                          </div>
                          <div class="progress-bg" style="height:4px;"><div class="progress-fill fill-blue" style="width:${pSkill}%"></div></div>
                     </div>
@@ -370,41 +389,90 @@ class Game {
 
     togglePlayer(el, id) {
         const idx = this.state.roster.indexOf(id);
+        const player = this.state.pool.find(p => p.id === id);
+
         if (idx > -1) {
-            this.state.roster.splice(idx, 1); el.classList.remove('selected');
+            // REMOVE Player
+            this.state.roster.splice(idx, 1); 
+            el.classList.remove('selected');
+            
+            // Revert Stats
+            this.state.cohesion -= player.trait.cohMod;
+            this.state.risk -= player.trait.riskMod;
+            // Note: We don't revert skill because the "Team Skill" is an average, 
+            // but for this simple logic we will just let the visual bar reflect the *impact* on cohesion/risk primarily.
         } else {
+            // ADD Player
             if (this.state.roster.length >= 5) return;
-            this.state.roster.push(id); el.classList.add('selected');
+            this.state.roster.push(id); 
+            el.classList.add('selected');
+
+            // Apply Trait Effects to Global State
+            this.state.cohesion += player.trait.cohMod;
+            this.state.risk += player.trait.riskMod;
         }
+        
         document.getElementById('btn-roster-next').disabled = (this.state.roster.length !== 5);
+        this.updateHUD();
     }
 
-    // Sim
+    // --- Sim ---
     async runSimulation() {
         document.getElementById('sim-controls').classList.add('hidden');
         const term = document.getElementById('sim-terminal');
-        const log = (msg) => {
-            const d = document.createElement('div'); d.innerText = `> ${msg}`; d.style.marginBottom = '5px';
+        const log = (msg, color='') => {
+            const d = document.createElement('div'); 
+            d.innerHTML = `> ${msg}`; 
+            d.style.marginBottom = '5px';
+            if(color) d.style.color = color;
             term.appendChild(d); term.scrollTop = term.scrollHeight;
         };
 
+        // Calculate Total Team Power
+        // Average Skill of selected players
+        const rosterObjs = this.state.pool.filter(p => this.state.roster.includes(p.id));
+        const avgSkill = rosterObjs.reduce((a,b) => a + b.skill, 0) / 5;
+        
+        const teamPower = avgSkill + (this.state.cohesion * 0.5) - (this.state.risk * 0.5);
         let wins = 0;
-        const teamPower = this.state.skill + (this.state.cohesion * 0.5) - (this.state.risk * 0.5);
         const delay = ms => new Promise(r => setTimeout(r, ms));
+
+        log(`ROSTER LOCKED. AVG SKILL: ${Math.floor(avgSkill)}`);
+        await delay(500);
 
         for(let i=1; i<=5; i++) {
             await delay(800);
-            const enemy = 40 + (i * 10);
-            if (teamPower + (Math.random()*20) > enemy) { wins++; log(`Week ${i}: VICTORY`); }
-            else { log(`Week ${i}: DEFEAT`); }
+            const enemy = 50 + (i * 8); // Difficulty curve
+            
+            // Check for Trait Triggers (Flavor text)
+            if (this.state.risk > 80 && Math.random() > 0.7) {
+                const tilter = rosterObjs.find(p => p.trait.label === 'Tilter');
+                if(tilter) log(`WARNING: ${tilter.name} is tilting! Performance dropped.`, '#ff2a6d');
+            }
+
+            if (teamPower + (Math.random()*20) > enemy) { 
+                wins++; 
+                log(`Week ${i} vs Rivals: VICTORY`, '#00ff88'); 
+            } else { 
+                log(`Week ${i} vs Rivals: DEFEAT`, '#ff2a6d'); 
+            }
         }
 
         await delay(1000);
         document.getElementById('sim-results').classList.remove('hidden');
         const title = document.getElementById('final-rank');
-        if (wins >= 4) { title.innerText = "CHAMPIONS"; title.style.color = "var(--primary)"; }
-        else if (wins >= 2) { title.innerText = "PLAYOFFS"; title.style.color = "var(--warning)"; }
-        else { title.innerText = "ELIMINATED"; title.style.color = "var(--danger)"; }
+        const summ = document.getElementById('final-summary');
+
+        if (wins >= 4) { 
+            title.innerText = "CHAMPIONS"; title.style.color = "var(--primary)"; 
+            summ.innerText = "The dynasty begins here.";
+        } else if (wins >= 2) { 
+            title.innerText = "PLAYOFFS"; title.style.color = "var(--warning)"; 
+            summ.innerText = "Solid season. Foundation built.";
+        } else { 
+            title.innerText = "ELIMINATED"; title.style.color = "var(--danger)"; 
+            summ.innerText = "Disappointing result. The board is watching.";
+        }
     }
 }
 
