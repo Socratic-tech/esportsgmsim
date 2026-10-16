@@ -675,6 +675,9 @@ Fri – Match day with pre/post match talks"></textarea>
         Use your season results to answer the prompts below. Then generate a reflection you can copy into a document or LMS.
       </p>
 
+      <label for="studentName">Your name</label>
+      <input id="studentName" placeholder="First and last name" autocomplete="name" />
+
       <label for="ref1">1. How well did your roster and recruitment choices match your stated recruitment focus?</label>
       <textarea id="ref1"></textarea>
 
@@ -689,6 +692,12 @@ Fri – Match day with pre/post match talks"></textarea>
 
       <button type="button" onclick="generateReflection()">Generate Reflection Summary</button>
       <div id="reflectionOut" class="output-block"></div>
+      <div class="export-row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+        <button type="button" onclick="copyReflection()">📋 Copy Reflection</button>
+        <button type="button" onclick="downloadReflection()">⬇️ Download .txt</button>
+        <span id="exportStatus" class="small-note" role="status" style="margin:0"></span>
+      </div>
+      <p class="small-note" style="color:var(--muted)">Your answers save automatically on this device. <button type="button" class="btn-secondary" onclick="clearSavedWork()" style="padding:4px 10px;font-size:0.8rem">Start over</button></p>
     </div>
   </div>
 
@@ -866,12 +875,12 @@ Timeline:
   const incsFlyer = incs.length ? incs.join("; ") : "Skill development, competition experience, and a positive team environment.";
 
   flyerDiv.innerHTML = `
-    <h2>${teamName || "Join Our Esports Team"}</h2>
+    <h2>${esc(teamName || "Join Our Esports Team")}</h2>
     <p style="text-align:center;font-weight:600;margin-bottom:4px;">LEVEL UP • COMPETE • BELONG</p>
     <hr />
-    <p><strong>Who We're Looking For</strong><br>${target || "Motivated students who love our game, want to grow, and can be great teammates."}</p>
-    <p><strong>Why Join?</strong><br>${incsFlyer}${incsOther ? "<br>"+incsOther : ""}</p>
-    <p><strong>How to Get Involved</strong><br>${actsFlyer}</p>
+    <p><strong>Who We're Looking For</strong><br>${esc(target || "Motivated students who love our game, want to grow, and can be great teammates.")}</p>
+    <p><strong>Why Join?</strong><br>${esc(incsFlyer)}${incsOther ? "<br>"+esc(incsOther) : ""}</p>
+    <p><strong>How to Get Involved</strong><br>${esc(actsFlyer)}</p>
     <p style="text-align:center;margin-top:10px;font-size:0.85rem;">Questions? Visit the esports lab or talk with the program coach.</p>
   `;
 }
@@ -1127,6 +1136,8 @@ Coach Notes:
   updateStepUI();
 }
 
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
 /* ---- Reflection ---- */
 function generateReflection(){
   if(!lastSim){
@@ -1138,8 +1149,10 @@ function generateReflection(){
   const r3 = document.getElementById("ref3").value || "(student response)";
   const r4 = document.getElementById("ref4").value || "(student response)";
 
+  const student = document.getElementById("studentName").value.trim() || "(student name)";
   const text =
 `${lastSim.teamName.toUpperCase()} – COACH REFLECTION
+Student: ${student}
 
 Season Outcome:
 • Tier: ${lastSim.tier}
@@ -1205,6 +1218,77 @@ renderPlayerGrid();
 setupOptionButtons();
 updateCounts();
 updateStepUI();
+</script>
+
+<script>
+/* ---- Autosave, student name, and reflection export ---- */
+(function(){
+  const KEY = "esportsgmsim:index:v1";
+  const fields = () => document.querySelectorAll("input[id], textarea[id], select[id]");
+  let clearing = false;
+  function save(){
+    if(clearing) return;
+    const data = {};
+    fields().forEach(el => { data[el.id] = el.type === "checkbox" ? el.checked : el.value; });
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
+  }
+  function restore(){
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e) {}
+    if(!data) return;
+    fields().forEach(el => {
+      if(!(el.id in data)) return;
+      if(el.type === "checkbox") el.checked = !!data[el.id];
+      else el.value = data[el.id];
+    });
+  }
+  let t = null;
+  document.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 300); });
+  document.addEventListener("change", save);
+  window.addEventListener("pagehide", save);
+  restore();
+
+  window.clearSavedWork = function(){
+    if(!confirm("Erase all of your saved answers on this page? This cannot be undone.")) return;
+    clearing = true;
+    clearTimeout(t);
+    try { localStorage.removeItem(KEY); } catch(e) {}
+    location.reload();
+  };
+
+  function reflectionText(){
+    return document.getElementById("reflectionOut").textContent.trim();
+  }
+  window.copyReflection = function(){
+    const text = reflectionText();
+    const status = document.getElementById("exportStatus");
+    if(!text){ status.textContent = "Generate your reflection first."; return; }
+    const done = () => { status.textContent = "Copied! Paste it into your document or LMS."; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch(e) { status.textContent = "Copy failed. Select the text and copy it manually."; }
+      ta.remove();
+    }
+  };
+  window.downloadReflection = function(){
+    const text = reflectionText();
+    const status = document.getElementById("exportStatus");
+    if(!text){ status.textContent = "Generate your reflection first."; return; }
+    const name = (document.getElementById("studentName").value.trim() || "student").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "student";
+    const blob = new Blob([text + "\n"], {type: "text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "gm-sim-reflection-" + name + ".txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    status.textContent = "Downloaded.";
+  };
+})();
 </script>
 </body>
 </html>

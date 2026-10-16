@@ -391,7 +391,6 @@ textarea{min-height:70px;resize:vertical;}
 
       <div class="intro-controls">
         <button id="beginBtn">Start Your Season</button>
-        <button id="toggleAudio" class="audio-btn">🔊 Enable Ambient Sound</button>
       </div>
     </div>
   </div>
@@ -630,6 +629,9 @@ textarea{min-height:70px;resize:vertical;}
   <div class="panel">
     <h2>6️⃣ Reflection</h2>
 
+    <label for="studentName">Your name</label>
+    <input id="studentName" placeholder="First and last name" autocomplete="name" />
+
     <label>1. How did your recruitment choices align with your focus?</label>
     <textarea id="ref1"></textarea>
 
@@ -644,6 +646,12 @@ textarea{min-height:70px;resize:vertical;}
 
     <button onclick="generateReflection()">Generate Reflection</button>
     <div id="reflectionOut" class="output-block"></div>
+      <div class="export-row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
+        <button type="button" onclick="copyReflection()">📋 Copy Reflection</button>
+        <button type="button" onclick="downloadReflection()">⬇️ Download .txt</button>
+        <span id="exportStatus" class="small-note" role="status" style="margin:0"></span>
+      </div>
+      <p class="small-note" style="color:var(--muted)">Your answers save automatically on this device. <button type="button" class="btn-secondary" onclick="clearSavedWork()" style="padding:4px 10px;font-size:0.8rem">Start over</button></p>
   </div>
 </div>
 
@@ -679,22 +687,6 @@ textarea{min-height:70px;resize:vertical;}
 const initSeqLines = document.querySelectorAll(".seq-line");
 const introMain = document.getElementById("introMain");
 const introOverlay = document.getElementById("introOverlay");
-
-// Electronic ambient track (non-autoplay)
-let introAudio = new Audio();
-introAudio.src = "https://cdn.pixabay.com/download/audio/2022/03/03/audio_25aa8d8f93.mp3?filename=cyberpunk-ambient-110386.mp3";
-introAudio.loop = true;
-introAudio.volume = 0.4;
-
-document.getElementById("toggleAudio").addEventListener("click", () => {
-  if (introAudio.paused) {
-    introAudio.play();
-    document.getElementById("toggleAudio").textContent = "🔇 Disable Ambient Sound";
-  } else {
-    introAudio.pause();
-    document.getElementById("toggleAudio").textContent = "🔊 Enable Ambient Sound";
-  }
-});
 
 function runInitSequence() {
   let delay = 600;
@@ -970,9 +962,9 @@ Week 4 – Final roster
 
   // Flyer
   document.getElementById("flyer").innerHTML =
-    `<h2>${name} – We’re Recruiting!</h2>
-     <p><strong>Who We Want:</strong><br>${target}</p>
-     <p><strong>Why Join:</strong><br>${incItems.join(", ")}</p>
+    `<h2>${esc(name)} – We’re Recruiting!</h2>
+     <p><strong>Who We Want:</strong><br>${esc(target)}</p>
+     <p><strong>Why Join:</strong><br>${esc(incItems.join(", "))}</p>
      <p><strong>How to Apply:</strong><br>Attend tryouts or fill out our interest form.</p>`;
 }
 
@@ -1067,6 +1059,8 @@ function runSimulation() {
 }
 
 
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
 /* ============================================================
    REFLECTION
 ============================================================ */
@@ -1076,9 +1070,12 @@ function generateReflection() {
   const r3 = document.getElementById("ref3").value;
   const r4 = document.getElementById("ref4").value;
 
+  const student = document.getElementById("studentName").value.trim() || "(student name)";
   const txt =
 `COACH REFLECTION
 =================
+Student: ${student}
+
 1. Recruitment Focus Alignment:
 ${r1}
 
@@ -1097,5 +1094,76 @@ ${r4}
 
 </script>
 
+
+<script>
+/* ---- Autosave, student name, and reflection export ---- */
+(function(){
+  const KEY = "esportsgmsim:round2:v1";
+  const fields = () => document.querySelectorAll("input[id], textarea[id], select[id]");
+  let clearing = false;
+  function save(){
+    if(clearing) return;
+    const data = {};
+    fields().forEach(el => { data[el.id] = el.type === "checkbox" ? el.checked : el.value; });
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
+  }
+  function restore(){
+    let data = null;
+    try { data = JSON.parse(localStorage.getItem(KEY) || "null"); } catch(e) {}
+    if(!data) return;
+    fields().forEach(el => {
+      if(!(el.id in data)) return;
+      if(el.type === "checkbox") el.checked = !!data[el.id];
+      else el.value = data[el.id];
+    });
+  }
+  let t = null;
+  document.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 300); });
+  document.addEventListener("change", save);
+  window.addEventListener("pagehide", save);
+  restore();
+
+  window.clearSavedWork = function(){
+    if(!confirm("Erase all of your saved answers on this page? This cannot be undone.")) return;
+    clearing = true;
+    clearTimeout(t);
+    try { localStorage.removeItem(KEY); } catch(e) {}
+    location.reload();
+  };
+
+  function reflectionText(){
+    return document.getElementById("reflectionOut").textContent.trim();
+  }
+  window.copyReflection = function(){
+    const text = reflectionText();
+    const status = document.getElementById("exportStatus");
+    if(!text){ status.textContent = "Generate your reflection first."; return; }
+    const done = () => { status.textContent = "Copied! Paste it into your document or LMS."; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else fallback();
+    function fallback(){
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch(e) { status.textContent = "Copy failed. Select the text and copy it manually."; }
+      ta.remove();
+    }
+  };
+  window.downloadReflection = function(){
+    const text = reflectionText();
+    const status = document.getElementById("exportStatus");
+    if(!text){ status.textContent = "Generate your reflection first."; return; }
+    const name = (document.getElementById("studentName").value.trim() || "student").replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "").slice(0, 40) || "student";
+    const blob = new Blob([text + "\n"], {type: "text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "gm-sim-round2-reflection-" + name + ".txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    status.textContent = "Downloaded.";
+  };
+})();
+</script>
 </body>
 </html>
