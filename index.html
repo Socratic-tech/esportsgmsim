@@ -2,378 +2,92 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Esports Recruitment, Staff & Outcome Simulator – Wizard (Buttons)</title>
+<title>Esports Program GM Simulator | Recruitment to Season</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="Plan an esports program, build a roster, and explore how coaching decisions shape a season." />
+<meta name="theme-color" content="#13231c" />
 <style>
-  :root{
-    --bg:#070b16;
-    --panel:#11172b;
-    --line:#1f2a52;
-    --text:#e8eeff;
-    --muted:#b9c8ff;
-    --accent:#6aa8ff;
-    --good:#10b981;
-    --bad:#ef4444;
-    --warn:#f59e0b;
-  }
   *{box-sizing:border-box}
-  body{
-    margin:0;
-    background:radial-gradient(circle at top,#192247 0,#070b16 55%);
-    color:var(--text);
-    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    line-height:1.55;
+  :root{
+    color-scheme:light;
+    --bg:#f2f4f1;--panel:#fff;--line:#d9dfd8;--text:#15231d;--muted:#53645c;
+    --accent:#c7f36b;--good:#167447;--bad:#b42336;--warn:#946200;
+    --ink:#13231c;--soft:#e9eee8;--focus:#155eef;
   }
-  h1,h2,h3{margin-top:0}
-  h1{font-size:1.9rem}
-  h2{font-size:1.4rem;color:var(--accent)}
-  h3{font-size:1.1rem;color:var(--muted)}
-
-  .container{
-    max-width:1100px;
-    margin:0 auto;
-    padding:16px 16px 80px;
-  }
-
-  /* Progress bar & step header */
-  .top-bar{
-    position:sticky;
-    top:0;
-    z-index:10;
-    background:linear-gradient(to bottom, rgba(7,11,22,0.96), rgba(7,11,22,0.9));
-    backdrop-filter:blur(10px);
-    padding:10px 0 12px;
-    margin-bottom:6px;
-  }
-  .progress-track{
-    width:100%;
-    height:6px;
-    border-radius:999px;
-    background:#1c2440;
-    overflow:hidden;
-    margin-bottom:8px;
-  }
-  .progress-fill{
-    height:100%;
-    width:0;
-    border-radius:999px;
-    background:linear-gradient(90deg,#6aa8ff,#a5b4fc);
-    transition:width 0.35s ease-out;
-  }
-  .step-labels{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-    font-size:0.78rem;
-  }
-  .step-chip{
-    padding:3px 9px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    color:var(--muted);
-    display:flex;
-    align-items:center;
-    gap:5px;
-    opacity:0.5;
-    transition:all 0.2s ease-out;
-  }
-  .step-chip span{
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    width:18px;
-    height:18px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    font-size:0.7rem;
-  }
-  .step-chip.active{
-    border-color:var(--accent);
-    color:var(--accent);
-    opacity:1;
-    box-shadow:0 0 0 1px rgba(106,168,255,0.25);
-  }
-  .step-chip.completed{
-    opacity:0.9;
-  }
-
-  .panel{
-    background:var(--panel);
-    border-radius:16px;
-    padding:18px 20px;
-    margin-bottom:18px;
-    border:1px solid var(--line);
-  }
-  label{font-weight:600;display:block;margin:8px 0 4px}
-  textarea,input,select{
-    width:100%;
-    padding:8px 10px;
-    border-radius:8px;
-    border:1px solid #2b355c;
-    background:#050815;
-    color:var(--text);
-    font-family:inherit;
-    font-size:0.95rem;
-  }
-  textarea{resize:vertical;min-height:60px}
-  .row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:12px;
-  }
-  .col{
-    flex:1 1 250px;
-  }
-
-  button{
-    padding:10px 18px;
-    border-radius:999px;
-    border:none;
-    background:var(--accent);
-    color:#050815;
-    font-weight:700;
-    cursor:pointer;
-    font-size:0.95rem;
-    margin-top:10px;
-  }
-  button:hover{background:#8dbdff}
-
-  .nav-bar{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    background:linear-gradient(to top, rgba(7,11,22,0.98), rgba(7,11,22,0.9));
-    backdrop-filter:blur(10px);
-    border-top:1px solid var(--line);
-    padding:8px 16px;
-  }
-  .nav-inner{
-    max-width:1100px;
-    margin:0 auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-  }
-  .step-counter{
-    font-size:0.85rem;
-    color:var(--muted);
-  }
-  .nav-buttons{
-    display:flex;
-    gap:8px;
-  }
-  .btn-secondary{
-    background:transparent;
-    border:1px solid var(--line);
-    color:var(--muted);
-  }
-  .btn-secondary:hover{
-    background:#11172b;
-  }
-
-  .pill{
-    display:inline-block;
-    padding:2px 10px;
-    border-radius:999px;
-    font-size:0.75rem;
-    font-weight:600;
-    background:#050815;
-    border:1px solid var(--line);
-    margin-right:4px;
-    margin-bottom:4px;
-  }
-  .pill.good{border-color:var(--good);color:var(--good)}
-  .pill.bad{border-color:var(--bad);color:var(--bad)}
-  .pill.warn{border-color:var(--warn);color:var(--warn)}
-
-  .output-block{
-    background:#050815;
-    border-radius:12px;
-    border:1px solid var(--line);
-    padding:12px 14px;
-    margin-top:10px;
-    white-space:pre-wrap;
-    font-size:0.9rem;
-  }
-
-  .flex{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-  }
-  .metric{
-    flex:1 1 160px;
-    background:#050815;
-    border-radius:12px;
-    border:1px solid var(--line);
-    padding:10px 12px;
-  }
-  .metric h4{
-    margin:0 0 4px;
-    font-size:0.9rem;
-    color:var(--muted);
-  }
-  .metric span{
-    font-size:1.1rem;
-    font-weight:700;
-  }
-
-  .flyer{
-    background:#f7f7ff;
-    color:#111827;
-    border-radius:14px;
-    padding:16px 18px;
-    margin-top:10px;
-  }
-  .flyer h2{
-    color:#111827;
-    text-align:center;
-    margin-top:0;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    font-size:1.2rem;
-  }
-  .flyer hr{
-    border:none;
-    border-top:2px solid #e5e7eb;
-    margin:8px 0 10px;
-  }
-  .small-note{
-    font-size:0.8rem;
-    color:var(--muted);
-    margin-top:2px;
-  }
-
-  .count-tag{
-    display:inline-block;
-    font-size:0.75rem;
-    padding:2px 8px;
-    border-radius:999px;
-    border:1px solid var(--line);
-    margin-left:6px;
-    color:var(--muted);
-  }
-
-  /* Option button style (for activities, incentives, staff) */
-  .option-grid{
-    display:flex;
-    flex-wrap:wrap;
-    gap:8px;
-  }
-  .option-btn{
-    flex:1 1 220px;
-    border-radius:12px;
-    padding:8px 10px;
-    border:1px solid #2b355c;
-    background:#050815;
-    color:var(--muted);
-    text-align:left;
-    font-size:0.85rem;
-    cursor:pointer;
-    display:flex;
-    align-items:flex-start;
-    gap:6px;
-    transition:all 0.15s ease-out;
-  }
-  .option-btn span.bullet{
-    width:18px;
-    height:18px;
-    border-radius:999px;
-    border:1px solid #2b355c;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:0.75rem;
-  }
-  .option-btn.selected{
-    border-color:var(--accent);
-    background:rgba(106,168,255,0.12);
-    color:var(--text);
-    box-shadow:0 0 0 1px rgba(106,168,255,0.3);
-  }
-  .option-btn.selected span.bullet{
-    border-color:var(--accent);
-    background:var(--accent);
-    color:#050815;
-  }
-
-  /* Player cards */
-  .player-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:10px;
-    margin-top:10px;
-  }
-  .player-card{
-    border-radius:12px;
-    border:1px solid #2b355c;
-    background:#050815;
-    padding:8px 10px;
-    cursor:pointer;
-    transition:all 0.15s ease-out;
-    font-size:0.8rem;
-  }
-  .player-card-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:4px;
-  }
-  .player-name{
-    font-weight:600;
-    font-size:0.85rem;
-  }
-  .player-role{
-    font-size:0.75rem;
-    color:var(--muted);
-  }
-  .player-stats{
-    display:flex;
-    flex-wrap:wrap;
-    gap:4px 8px;
-    margin-top:4px;
-  }
-  .stat-pill{
-    font-size:0.7rem;
-    padding:1px 6px;
-    border-radius:999px;
-    border:1px solid #2b355c;
-  }
-  .player-card.selected{
-    border-color:var(--accent);
-    background:rgba(106,168,255,0.18);
-    box-shadow:0 0 0 1px rgba(106,168,255,0.35);
-  }
-
-  /* Step transitions */
-  .step{
-    display:none;
-    opacity:0;
-    transform:translateY(6px);
-    transition:opacity 0.25s ease-out, transform 0.25s ease-out;
-  }
-  .step.active{
-    display:block;
-    opacity:1;
-    transform:translateY(0);
-  }
-
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.6}
+  h1,h2,h3,h4{margin-top:0;letter-spacing:-.035em;color:var(--ink)}
+  h1{font-size:clamp(2rem,5vw,3.35rem);line-height:1.03;max-width:17ch;margin:0 0 12px}
+  h2{font-size:1.6rem}h3{font-size:1.08rem;margin:24px 0 10px}
+  p{color:var(--muted)}
+  .container{max-width:1120px;margin:0 auto;padding:24px 24px 120px}
+  .top-bar{position:sticky;top:0;z-index:10;background:rgba(19,35,28,.97);color:#fff;padding:12px 0 14px;box-shadow:0 8px 26px #14251d1c}
+  .progress-track{width:100%;height:5px;background:#ffffff26;border-radius:99px;overflow:hidden;margin-bottom:12px}
+  .progress-fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+  .step-labels{display:flex;gap:6px;justify-content:space-between;font-size:.76rem}
+  .step-chip{display:flex;align-items:center;gap:5px;border:0;color:#d3ded6;padding:4px 8px;opacity:.68;white-space:nowrap}
+  .step-chip span{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;border:1px solid #ffffff60;color:#fff}
+  .step-chip span{border-color:#ffffff60;color:#fff}
+  .step-chip.active{color:var(--accent);box-shadow:none;font-weight:750}
+  .step-chip.active span{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+  .step-chip.completed{opacity:1;color:#fff}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:clamp(20px,4vw,36px);box-shadow:0 14px 38px #15231d0a;margin-bottom:18px}
+  label{display:block;font-size:.9rem;font-weight:650;color:var(--ink);margin:14px 0 6px}
+  input:not([type=checkbox]),textarea,select{border:1px solid #b8c4ba;background:#fbfcfa;color:var(--ink);border-radius:10px;padding:11px 13px;min-height:46px;font-size:1rem}
+  input:not([type=checkbox]),textarea,select{width:100%;font-family:inherit}
+  textarea{min-height:92px}
+  input[type=checkbox]{accent-color:#375e24;width:18px;height:18px;vertical-align:middle}
+  .row{display:flex;flex-wrap:wrap;gap:12px}.col{flex:1 1 250px}
+  button{border:0;font:inherit;font-weight:700;background:var(--ink);color:#fff;border-radius:10px;padding:11px 17px;min-height:44px;transition:background-color .16s,transform .16s;margin-top:10px;cursor:pointer}
+  button:hover{background:#294638;transform:translateY(-1px)}
+  button:disabled{opacity:.48;cursor:not-allowed;transform:none}
+  button:focus-visible,[role=button]:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+  .btn-secondary{background:#fff;border:1px solid #87968b;color:var(--ink)}
+  .btn-secondary:hover{background:#edf1ed}
+  .nav-bar{position:fixed;z-index:20;bottom:0;left:0;right:0;background:#fffffff2;border-top:1px solid var(--line);box-shadow:0 -8px 24px #14251d0c;padding:10px 16px env(safe-area-inset-bottom,10px)}
+  .nav-inner{max-width:1072px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}.nav-buttons{display:flex;gap:8px}.step-counter{color:var(--muted);font-weight:650}
+  .pill,.count-tag,.stat-pill{display:inline-block;background:#f3f6f2;border:1px solid #cbd5cc;color:#3d4e43}
+  .pill{padding:2px 10px;border-radius:999px;font-size:.75rem;font-weight:650;margin:0 4px 4px 0}
+  .count-tag{padding:2px 8px;border-radius:999px;font-size:.75rem;margin-left:6px}
+  .pill.good{color:#12643c;border-color:#65a77f}.pill.bad{color:#a01d31;border-color:#d27782}.pill.warn{color:#805600;border-color:#d5b65d}
+  .output-block{background:#f6f8f5;border:1px solid var(--line);border-radius:12px;color:var(--ink);padding:16px;line-height:1.65;margin-top:10px;white-space:pre-wrap;font-size:.94rem}
+  .flex{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch}.metric{flex:1 1 160px;background:var(--ink);border:0;border-radius:14px;padding:18px;color:#fff}
+  .metric h4{color:#cad7cd;margin:0 0 4px;font-size:.9rem}.metric span{font-size:1.5rem;color:var(--accent)}
+  .flyer{background:#f5f7f2;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:10px;color:var(--ink)}
+  .flyer h2{color:var(--ink);text-align:center;text-transform:uppercase;letter-spacing:.06em;font-size:1.2rem}.flyer hr{border:0;border-top:2px solid #dfe5dc;margin:8px 0 10px}
+  .option-grid{display:flex;flex-wrap:wrap;gap:10px}
+  .option-btn{display:flex;align-items:flex-start;gap:8px;flex:1 1 220px;background:#fbfcfa;color:var(--ink);border:1px solid #cbd5cc;border-radius:13px;padding:13px;min-height:64px;font-size:.94rem;line-height:1.45;text-align:left;transition:border-color .15s,background-color .15s,box-shadow .15s}
+  .option-btn:hover,.player-card:hover{border-color:#778b7d;background:#f5f8f3}
+  .option-btn.selected,.player-card.selected{background:#f2f9e6;border-color:#5b7d2e;box-shadow:inset 0 0 0 1px #5b7d2e;color:var(--ink)}
+  .option-btn span.bullet{display:inline-flex;align-items:center;justify-content:center;flex:0 0 20px;width:20px;height:20px;border:1px solid #87968b;border-radius:50%;font-size:.8rem;color:#36473c}
+  .option-btn.selected span.bullet{background:#d8f39d;border-color:#5b7d2e;color:#24331c}
+  .player-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px;margin-top:10px}
+  .player-card{border:1px solid #cbd5cc;background:#fff;border-radius:14px;padding:16px;min-height:120px;transition:border-color .15s,background-color .15s,box-shadow .15s}
+  .player-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}.player-stats{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}.stat-pill{font-size:.72rem;padding:2px 7px;border-radius:999px;border:1px solid #cbd5cc}
+  .player-name{font-size:1rem;color:var(--ink)}.player-role{color:#53645c}
+  .step{transform:none;transition:none}.step[hidden]{display:none}
+  .brand-row{display:flex;align-items:center;gap:9px;margin:2px 0 20px;color:var(--ink);font-size:.8rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  .brand-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--ink);font-size:.82rem}
+  .hero-copy{max-width:760px;margin-bottom:24px;color:var(--muted);font-size:1.05rem}
+  .eyebrow{margin:0 0 9px;color:#476d25;font-size:.76rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+  .small-note{color:#53645c;font-size:.85rem}
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  .player-card[role=button]{width:100%;font:inherit;text-align:left;cursor:pointer}
   @media(max-width:720px){
-    .row{flex-direction:column}
-    .nav-inner{flex-direction:column;align-items:flex-start}
+    .container{padding:18px 16px 142px}.step-labels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px}.step-chip{justify-content:flex-start;padding:4px 2px;font-size:.7rem}.step-chip span{width:22px;height:22px;flex:0 0 22px}
+    .nav-inner{flex-direction:row;align-items:center}.step-counter{font-size:.78rem}.nav-buttons{gap:6px}.nav-buttons button{margin-top:0;padding:9px 12px;min-height:44px}
+    .row{flex-direction:column}.panel{border-radius:15px}.option-btn{flex-basis:100%}
   }
+  @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
-<div class="top-bar">
+<header class="top-bar">
   <div class="container" style="padding-bottom:0;">
-    <div class="progress-track">
+    <div class="progress-track" role="progressbar" aria-label="Simulator progress" aria-valuemin="1" aria-valuemax="6" aria-valuenow="1" id="progressTrack">
       <div class="progress-fill" id="progressFill"></div>
     </div>
-    <div class="step-labels">
+  <div class="step-labels" aria-label="Six simulator steps">
       <div class="step-chip" data-step-label="1"><span>1</span>Recruitment</div>
       <div class="step-chip" data-step-label="2"><span>2</span>Training</div>
       <div class="step-chip" data-step-label="3"><span>3</span>Staff</div>
@@ -382,19 +96,19 @@
       <div class="step-chip" data-step-label="6"><span>6</span>Reflection</div>
     </div>
   </div>
-</div>
+</header>
 
-<div class="container">
+<main class="container">
 
-  <h1>Esports Recruitment, Staff & Outcome Simulator</h1>
-  <p style="color:var(--muted);max-width:800px">
-    Move through each step in order: recruitment → training → staff → roster → season simulation → coach reflection.
-  </p>
+  <div class="brand-row"><span class="brand-mark" aria-hidden="true">GM</span> Esports program management lab</div>
+  <p class="eyebrow">Build a program. Lead a season.</p>
+  <h1>Make the calls behind a stronger esports team.</h1>
+  <p class="hero-copy">Design a recruitment plan, shape training and support, build a five-player roster, then see how your decisions play out over a season.</p>
 
   <!-- STEP 1: RECRUITMENT -->
-  <div class="step active" data-step="1">
+  <section class="step active" data-step="1" aria-labelledby="step1-title">
     <div class="panel">
-      <h2>1️⃣ Recruitment Plan</h2>
+      <h2 id="step1-title" tabindex="-1">01 <span aria-hidden="true">/</span> Recruitment plan</h2>
       <div class="row">
         <div class="col">
           <label for="teamName">Program / Team Name</label>
@@ -416,7 +130,7 @@
 
       <h3>
         Recruitment Activities
-        <span class="count-tag" id="recCountTag">0 / 3 selected</span>
+        <span class="count-tag" id="recCountTag" aria-live="polite">0 / 3 selected</span>
       </h3>
       <div class="option-grid">
         <!-- data-skill / data-cohesion / data-risk effects added -->
@@ -470,7 +184,7 @@
 
       <h3>
         Incentives & Benefits
-        <span class="count-tag" id="incCountTag">0 / 3 selected</span>
+        <span class="count-tag" id="incCountTag" aria-live="polite">0 / 3 selected</span>
       </h3>
       <div class="option-grid">
         <div class="option-btn incOpt"
@@ -516,17 +230,17 @@
       <textarea id="incentivesOther" placeholder="Any additional benefits you want to offer."></textarea>
 
       <button type="button" onclick="generatePlan()">Generate Written Recruitment Plan & Flyer</button>
-      <div id="recruitmentPlanOut" class="output-block"></div>
+      <div id="recruitmentPlanOut" class="output-block" aria-live="polite"></div>
 
       <h3>Recruitment Flyer Preview</h3>
       <div id="flyer" class="flyer"></div>
     </div>
-  </div>
+  </section>
 
   <!-- STEP 2: TRAINING -->
-  <div class="step" data-step="2">
+  <section class="step" data-step="2" aria-labelledby="step2-title" hidden>
     <div class="panel">
-      <h2>2️⃣ Training Framework</h2>
+      <h2 id="step2-title" tabindex="-1">02 <span aria-hidden="true">/</span> Training framework</h2>
       <div class="row">
         <div class="col">
           <label for="preIntensity">Pre-Season Intensity</label>
@@ -568,14 +282,14 @@ Fri – Match day with pre/post match talks"></textarea>
       <textarea id="monitor" placeholder="Example: Player goal sheets, stat tracking, wellness check-ins, mid-season 1:1s, end-of-season reflection."></textarea>
 
       <button type="button" onclick="generateTraining()">Generate Training Framework</button>
-      <div id="trainingOut" class="output-block"></div>
+      <div id="trainingOut" class="output-block" aria-live="polite"></div>
     </div>
-  </div>
+  </section>
 
   <!-- STEP 3: STAFF -->
-  <div class="step" data-step="3">
+  <section class="step" data-step="3" aria-labelledby="step3-title" hidden>
     <div class="panel">
-      <h2>3️⃣ Staff & Support Team</h2>
+      <h2 id="step3-title" tabindex="-1">03 <span aria-hidden="true">/</span> Staff &amp; support team</h2>
       <p style="color:var(--muted);margin-top:0">
         Head Coach is required. Choose up to <strong>4</strong> additional staff roles. Staff choices affect performance, cohesion, and burnout/health risk.
       </p>
@@ -583,7 +297,7 @@ Fri – Match day with pre/post match talks"></textarea>
 
       <h3>
         Staff Roles
-        <span class="count-tag" id="staffCountTag">0 / 4 selected</span>
+        <span class="count-tag" id="staffCountTag" aria-live="polite">0 / 4 selected</span>
       </h3>
       <div class="option-grid">
         <div class="option-btn staffOpt" data-label="Analyst Coach" data-skill="5" data-cohesion="1" data-risk="-1">
@@ -616,12 +330,12 @@ Fri – Match day with pre/post match talks"></textarea>
         </div>
       </div>
     </div>
-  </div>
+  </section>
 
   <!-- STEP 4: PLAYERS -->
-  <div class="step" data-step="4">
+  <section class="step" data-step="4" aria-labelledby="step4-title" hidden>
     <div class="panel">
-      <h2>4️⃣ Virtual Player Pool</h2>
+      <h2 id="step4-title" tabindex="-1">04 <span aria-hidden="true">/</span> Build your roster</h2>
       <p style="color:var(--muted);margin-top:0">
         Choose <strong>exactly 5</strong> players for your roster. Your recruitment focus, staff choices, and training plan will interact with these stats.
       </p>
@@ -630,17 +344,18 @@ Fri – Match day with pre/post match talks"></textarea>
       <div class="pill bad">High Toxicity</div>
       <h3>
         Roster Selection
-        <span class="count-tag" id="playerCountTag">0 / 5 selected</span>
+        <span class="count-tag" id="playerCountTag" aria-live="polite">0 / 5 selected</span>
       </h3>
-      <div class="player-grid" id="playerGrid"></div>
+      <div class="player-grid" id="playerGrid" aria-label="Available players"></div>
+      <div id="selectionStatus" class="sr-only" role="status" aria-live="polite"></div>
       <div class="small-note">Tap/click player cards to select. You cannot select more than 5 players.</div>
     </div>
-  </div>
+  </section>
 
   <!-- STEP 5: SIMULATION -->
-  <div class="step" data-step="5">
+  <section class="step" data-step="5" aria-labelledby="step5-title" hidden>
     <div class="panel">
-      <h2>5️⃣ Season Simulation</h2>
+      <h2 id="step5-title" tabindex="-1">05 <span aria-hidden="true">/</span> Season simulation</h2>
       <p style="color:var(--muted);margin-top:0">
         When you’re happy with your plan, staff, and roster, click the button below to simulate your season.
       </p>
@@ -656,21 +371,22 @@ Fri – Match day with pre/post match talks"></textarea>
           <span id="m_cohesion">–</span>
         </div>
         <div class="metric">
-          <h4>Burnout / Risk</h4>
+          <h4>Burnout / Workload Risk</h4>
           <span id="m_risk">–</span>
         </div>
       </div>
 
       <h3 style="margin-top:14px;">Season Outcome</h3>
-      <div id="outcomeSummary" class="output-block"></div>
+      <div id="outcomeSummary" class="output-block" aria-live="polite"></div>
+      <p class="small-note">This is a simplified teaching model. Real season outcomes also depend on the game, league rules, coaching, program resources, and each player's circumstances.</p>
       <div class="small-note">Tip: If the outcome isn’t what you hoped, go back a step and adjust your plan, staff, or roster, then simulate again.</div>
     </div>
-  </div>
+  </section>
 
   <!-- STEP 6: REFLECTION -->
-  <div class="step" data-step="6">
+  <section class="step" data-step="6" aria-labelledby="step6-title" hidden>
     <div class="panel">
-      <h2>6️⃣ Coach Reflection</h2>
+      <h2 id="step6-title" tabindex="-1">06 <span aria-hidden="true">/</span> Coach reflection</h2>
       <p style="color:var(--muted);margin-top:0">
         Use your season results to answer the prompts below. Then generate a reflection you can copy into a document or LMS.
       </p>
@@ -691,20 +407,20 @@ Fri – Match day with pre/post match talks"></textarea>
       <textarea id="ref4"></textarea>
 
       <button type="button" onclick="generateReflection()">Generate Reflection Summary</button>
-      <div id="reflectionOut" class="output-block"></div>
+      <div id="reflectionOut" class="output-block" aria-live="polite"></div>
       <div class="export-row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px">
         <button type="button" onclick="copyReflection()">📋 Copy Reflection</button>
         <button type="button" onclick="downloadReflection()">⬇️ Download .txt</button>
         <span id="exportStatus" class="small-note" role="status" style="margin:0"></span>
       </div>
-      <p class="small-note" style="color:var(--muted)">Your answers save automatically on this device. <button type="button" class="btn-secondary" onclick="clearSavedWork()" style="padding:4px 10px;font-size:0.8rem">Start over</button></p>
+      <p class="small-note">Your plan, selections, results, and reflection save on this device. <button type="button" class="btn-secondary" onclick="clearSavedWork()" style="padding:4px 10px;font-size:0.8rem">Start over</button></p>
     </div>
-  </div>
+  </section>
 
-</div>
+</main>
 
 <!-- Bottom navigation -->
-<div class="nav-bar">
+<nav class="nav-bar" aria-label="Simulator steps">
   <div class="nav-inner">
     <div class="step-counter" id="stepCounter">Step 1 of 6 · Recruitment</div>
     <div class="nav-buttons">
@@ -712,7 +428,7 @@ Fri – Match day with pre/post match talks"></textarea>
       <button type="button" id="nextBtn" onclick="changeStep(1)">Next</button>
     </div>
   </div>
-</div>
+</nav>
 
 <script>
 /* ---- Data ---- */
@@ -755,16 +471,23 @@ function updateStepUI(){
   steps.forEach(s=>{
     const stepNum = parseInt(s.dataset.step,10);
     s.classList.toggle("active", stepNum === currentStep);
+    s.hidden = stepNum !== currentStep;
+    s.setAttribute("aria-hidden", stepNum !== currentStep ? "true" : "false");
   });
 
   const pct = (currentStep-1)/(totalSteps-1)*100;
   document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressTrack").setAttribute("aria-valuenow", currentStep);
 
   const chips = document.querySelectorAll(".step-chip");
   chips.forEach(ch=>{
     const n = parseInt(ch.dataset.stepLabel,10);
     ch.classList.toggle("active", n === currentStep);
     ch.classList.toggle("completed", n < currentStep);
+  });
+  chips.forEach(ch=>{
+    if(Number(ch.dataset.stepLabel) === currentStep) ch.setAttribute("aria-current", "step");
+    else ch.removeAttribute("aria-current");
   });
 
   const names = ["Recruitment","Training","Staff","Roster","Simulation","Reflection"];
@@ -773,7 +496,9 @@ function updateStepUI(){
   const prevBtn = document.getElementById("prevBtn");
   const nextBtn = document.getElementById("nextBtn");
   prevBtn.disabled = currentStep === 1;
-  nextBtn.textContent = currentStep === totalSteps ? "Done" : "Next";
+  nextBtn.textContent = currentStep === totalSteps ? "Complete" : "Next";
+  nextBtn.disabled = currentStep === totalSteps;
+  if(window.saveSimulatorWork) window.saveSimulatorWork();
 }
 
 function changeStep(delta){
@@ -781,6 +506,9 @@ function changeStep(delta){
   if(newStep < 1 || newStep > totalSteps) return;
   currentStep = newStep;
   updateStepUI();
+  const title = document.querySelector(`.step[data-step="${currentStep}"] h2`);
+  if(title) title.focus({preventScroll:true});
+  window.scrollTo({top:0,behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
 }
 
 /* ---- Render player cards ---- */
@@ -790,6 +518,10 @@ function renderPlayerGrid(){
   playerPool.forEach(p=>{
     const card = document.createElement("div");
     card.className = "player-card";
+    card.setAttribute("role", "button");
+    card.tabIndex = 0;
+    card.setAttribute("aria-pressed", "false");
+    card.setAttribute("aria-label", `${p.name}, ${p.role}. Mechanics ${p.mech}, game sense ${p.iq}, communication ${p.comm}, teamwork ${p.team}, commitment ${p.commit}, conduct risk ${p.toxic}.`);
     card.dataset.id = p.id;
     card.innerHTML = `
       <div class="player-card-header">
@@ -799,12 +531,12 @@ function renderPlayerGrid(){
         </div>
       </div>
       <div class="player-stats">
-        <span class="stat-pill">Mech: ${p.mech}</span>
-        <span class="stat-pill">IQ: ${p.iq}</span>
-        <span class="stat-pill">Comm: ${p.comm}</span>
-        <span class="stat-pill">Team: ${p.team}</span>
-        <span class="stat-pill">Commit: ${p.commit}</span>
-        <span class="stat-pill">Toxic: ${p.toxic}</span>
+        <span class="stat-pill">Mechanics: ${p.mech}</span>
+        <span class="stat-pill">Game sense: ${p.iq}</span>
+        <span class="stat-pill">Communication: ${p.comm}</span>
+        <span class="stat-pill">Teamwork: ${p.team}</span>
+        <span class="stat-pill">Commitment: ${p.commit}</span>
+        <span class="stat-pill">Conduct risk: ${p.toxic}</span>
       </div>
     `;
     card.addEventListener("click",()=>{
@@ -812,11 +544,17 @@ function renderPlayerGrid(){
       const alreadySelected = card.classList.contains("selected");
       if(alreadySelected){
         card.classList.remove("selected");
+        card.setAttribute("aria-pressed", "false");
       }else{
-        if(selectedCards.length >= 5) return;
+        if(selectedCards.length >= 5){document.getElementById("selectionStatus").textContent="Roster full. Remove a player before choosing another.";return;}
         card.classList.add("selected");
+        card.setAttribute("aria-pressed", "true");
       }
       updateCounts();
+      if(window.saveSimulatorWork) window.saveSimulatorWork();
+    });
+    card.addEventListener("keydown",event=>{
+      if(event.key === "Enter" || event.key === " "){event.preventDefault();card.click();}
     });
     grid.appendChild(card);
   });
@@ -1069,10 +807,10 @@ function runSimulation(){
   if(avgCommit<70){
     notes.push("Low average commitment increases risk of no-shows, burnout, or academic ineligibility.");
   }
-  if(mechFocus && !document.getElementById("tf_mech").checked){
+  if(focus==="mechanics" && !mechFocus){
     notes.push("You recruited for mechanics but did not emphasize mechanics enough in training.");
   }
-  if(cultFocus && !document.getElementById("tf_culture").checked){
+  if(focus==="culture" && !cultFocus){
     notes.push("You recruited for culture but did not protect it with dedicated culture/wellness time.");
   }
   if(hours>10){
@@ -1134,6 +872,7 @@ Coach Notes:
 
   currentStep = 6;
   updateStepUI();
+  if(window.saveSimulatorWork) window.saveSimulatorWork();
 }
 
 function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
@@ -1194,16 +933,25 @@ function setupOptionButtons(){
   function setupGroup(className, limit){
     const btns = document.querySelectorAll(className);
     btns.forEach(btn=>{
+      btn.setAttribute("role", "button");
+      btn.setAttribute("tabindex", "0");
+      btn.setAttribute("aria-pressed", btn.classList.contains("selected") ? "true" : "false");
+      btn.addEventListener("keydown",event=>{
+        if(event.key === "Enter" || event.key === " "){event.preventDefault();btn.click();}
+      });
       btn.addEventListener("click",()=>{
         const selectedBtns = document.querySelectorAll(className + ".selected");
         const alreadySelected = btn.classList.contains("selected");
         if(alreadySelected){
           btn.classList.remove("selected");
+          btn.setAttribute("aria-pressed", "false");
         }else{
-          if(selectedBtns.length >= limit) return;
+          if(selectedBtns.length >= limit){document.getElementById("selectionStatus").textContent=`Selection limit reached (${limit}). Remove one before choosing another.`;return;}
           btn.classList.add("selected");
+          btn.setAttribute("aria-pressed", "true");
         }
         updateCounts();
+        if(window.saveSimulatorWork) window.saveSimulatorWork();
       });
     });
   }
@@ -1230,6 +978,20 @@ updateStepUI();
     if(clearing) return;
     const data = {};
     fields().forEach(el => { data[el.id] = el.type === "checkbox" ? el.checked : el.value; });
+    data.currentStep = currentStep;
+    data.selections = {};
+    [".recOpt", ".incOpt", ".staffOpt"].forEach(selector=>{
+      data.selections[selector] = Array.from(document.querySelectorAll(selector)).map((el,index)=>el.classList.contains("selected")?index:null).filter(index=>index!==null);
+    });
+    data.selections.players = Array.from(document.querySelectorAll(".player-card.selected")).map(card=>Number(card.dataset.id));
+    data.lastSim = lastSim;
+    data.outputs = {
+      recruitmentPlanOut: document.getElementById("recruitmentPlanOut").textContent,
+      flyer: document.getElementById("flyer").innerHTML,
+      trainingOut: document.getElementById("trainingOut").textContent,
+      outcomeSummary: document.getElementById("outcomeSummary").textContent,
+      reflectionOut: document.getElementById("reflectionOut").textContent
+    };
     try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
   }
   function restore(){
@@ -1241,12 +1003,42 @@ updateStepUI();
       if(el.type === "checkbox") el.checked = !!data[el.id];
       else el.value = data[el.id];
     });
+    currentStep = Number.isInteger(data.currentStep) ? Math.max(1,Math.min(totalSteps,data.currentStep)) : 1;
+    [".recOpt", ".incOpt", ".staffOpt"].forEach(selector=>{
+      const choices = new Set(data.selections?.[selector] || []);
+      document.querySelectorAll(selector).forEach((el,index)=>{
+        el.classList.toggle("selected", choices.has(index));
+        el.setAttribute("aria-pressed", choices.has(index) ? "true" : "false");
+      });
+    });
+    const players = new Set(data.selections?.players || []);
+    document.querySelectorAll(".player-card").forEach(card=>{
+      const selected = players.has(Number(card.dataset.id));
+      card.classList.toggle("selected", selected);
+      card.setAttribute("aria-pressed", selected ? "true" : "false");
+    });
+    lastSim = data.lastSim || null;
+    if(data.outputs){
+      document.getElementById("recruitmentPlanOut").textContent = data.outputs.recruitmentPlanOut || "";
+      document.getElementById("flyer").innerHTML = data.outputs.flyer || "";
+      document.getElementById("trainingOut").textContent = data.outputs.trainingOut || "";
+      document.getElementById("outcomeSummary").textContent = data.outputs.outcomeSummary || "";
+      document.getElementById("reflectionOut").textContent = data.outputs.reflectionOut || "";
+    }
+    if(lastSim){
+      document.getElementById("m_skill").textContent = lastSim.skill;
+      document.getElementById("m_cohesion").textContent = lastSim.cohesion;
+      document.getElementById("m_risk").textContent = lastSim.risk;
+    }
   }
   let t = null;
   document.addEventListener("input", () => { clearTimeout(t); t = setTimeout(save, 300); });
   document.addEventListener("change", save);
   window.addEventListener("pagehide", save);
+  window.saveSimulatorWork = save;
   restore();
+  updateCounts();
+  updateStepUI();
 
   window.clearSavedWork = function(){
     if(!confirm("Erase all of your saved answers on this page? This cannot be undone.")) return;
